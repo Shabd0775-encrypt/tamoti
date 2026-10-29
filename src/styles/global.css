@@ -1,0 +1,277 @@
+/* Page-wide basics, then the play screen. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--turquoise);
+  color: var(--teal);
+}
+
+:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 3px;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* ---------- Play screen layout ---------- */
+
+.play {
+  /* The board is as big as the screen allows. Cell sizes follow from it. */
+  --board-size: min(100vw - 32px, 64dvh, 560px);
+  --cell: calc(var(--board-size) / var(--size));
+  --tray-cell: min(calc(var(--cell) * 0.6), 34px);
+
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.play-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px 24px;
+  margin-bottom: 24px;
+}
+
+.play-bar h1 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.sizes {
+  display: flex;
+  gap: 4px;
+}
+
+.sizes button {
+  padding: 6px 12px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: transparent;
+  font-variant-numeric: tabular-nums;
+}
+
+.sizes button[aria-pressed='true'] {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: var(--white);
+}
+
+.play-area {
+  display: grid;
+  gap: 24px;
+  justify-content: center;
+}
+
+@media (min-width: 900px) {
+  .play-area {
+    grid-template-columns: var(--board-size) minmax(240px, 320px);
+    align-items: start;
+    gap: 48px;
+  }
+}
+
+/* ---------- Board ---------- */
+
+.board {
+  position: relative;
+  width: var(--board-size);
+  aspect-ratio: 1;
+  border-radius: var(--board-radius);
+  background: var(--board);
+  touch-action: none;
+}
+
+.cells {
+  display: grid;
+  grid-template-columns: repeat(var(--size), 1fr);
+  height: 100%;
+}
+
+.cells span {
+  border-right: 1px solid var(--cell-line);
+  border-bottom: 1px solid var(--cell-line);
+}
+
+/* Anything sitting on the board is placed with four numbers: row, column, width, height. */
+.on-board {
+  position: absolute;
+  left: calc(var(--c) * 100% / var(--size));
+  top: calc(var(--r) * 100% / var(--size));
+  width: calc(var(--w) * 100% / var(--size));
+  height: calc(var(--h) * 100% / var(--size));
+}
+
+.blocked {
+  padding: var(--piece-gap);
+}
+
+.blocked::before {
+  content: '';
+  display: block;
+  height: 100%;
+  border-radius: var(--piece-radius);
+  /* Fine diagonal stripes, so a blocked cell never reads as a piece. */
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--blocked) 0 5px,
+    color-mix(in oklab, var(--blocked) 82%, var(--white)) 5px 7px
+  );
+}
+
+.ghost {
+  padding: var(--piece-gap);
+  pointer-events: none;
+}
+
+.ghost::before {
+  content: '';
+  display: block;
+  height: 100%;
+  border-radius: var(--piece-radius);
+  background: var(--ghost-fits);
+}
+
+.ghost.is-blocked::before {
+  background: var(--ghost-blocked);
+}
+
+/* ---------- Pieces ---------- */
+
+.piece {
+  padding: var(--piece-gap);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.piece-body {
+  height: 100%;
+  border-radius: var(--piece-radius);
+  background: var(--tone);
+  box-shadow: inset 0 0 0 1px var(--piece-edge);
+}
+
+.piece[data-tone='1'] { --tone: var(--tone-1); }
+.piece[data-tone='2'] { --tone: var(--tone-2); }
+.piece[data-tone='3'] { --tone: var(--tone-3); }
+.piece[data-tone='4'] { --tone: var(--tone-4); }
+
+.board .piece .piece-body {
+  animation: settle var(--settle) var(--ease-out);
+}
+
+@keyframes settle {
+  from {
+    transform: scale(1.04);
+  }
+}
+
+/* The piece being dragged leaves a gap where it was. */
+.piece.is-lifted {
+  opacity: 0.25;
+}
+
+.board .piece.is-lifted {
+  opacity: 0;
+}
+
+/* The copy that follows the pointer. */
+.drag-layer {
+  position: fixed;
+  z-index: 10;
+  pointer-events: none;
+  cursor: grabbing;
+}
+
+.drag-layer .piece-body {
+  box-shadow:
+    inset 0 0 0 1px var(--piece-edge),
+    var(--lift-shadow);
+}
+
+/* ---------- Tray and controls ---------- */
+
+.tray {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: calc(var(--tray-cell) * 2);
+}
+
+.tray .piece {
+  width: calc(var(--w) * var(--tray-cell));
+  height: calc(var(--h) * var(--tray-cell));
+}
+
+.status {
+  margin: 20px 0 0;
+  color: var(--ink-soft);
+  max-width: 34ch;
+}
+
+.status strong {
+  display: block;
+  color: var(--ink);
+  font-size: 1.125rem;
+}
+
+/* Keyboard tips only make sense where there's a mouse (and so likely a keyboard). */
+@media (hover: none) {
+  .keyboard-tip {
+    display: none;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.actions button {
+  padding: 8px 16px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--white);
+}
+
+.actions button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .board .piece .piece-body {
+    animation: none;
+  }
+}

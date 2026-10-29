@@ -1,0 +1,50 @@
+/*
+  Design tokens: every color, size and timing the game uses, named by its job.
+  Components only ever use these names (like var(--blocked)), never raw colors.
+  That's what will let each of the six design directions restyle the whole
+  game by swapping this one list.
+*/
+
+:root {
+  /* The fixed palette. Only these five, plus mixes of them. */
+  --white: #ffffff;
+  --turquoise: #8cbebf;
+  --coral: #e5765c;
+  --teal: #344c4b;
+  --spring: #dfe0c3;
+
+  /* Surfaces and text */
+  --page: color-mix(in oklab, var(--spring) 28%, var(--white));
+  --ink: var(--teal);
+  --ink-soft: color-mix(in oklab, var(--teal) 78%, var(--white));
+  --rule: color-mix(in oklab, var(--teal) 14%, transparent);
+
+  /* The board */
+  --board: color-mix(in oklab, var(--spring) 75%, var(--white));
+  --cell-line: color-mix(in oklab, var(--teal) 10%, transparent);
+  --blocked: var(--teal);
+
+  /* Pieces take one of four tones */
+  --tone-1: var(--turquoise);
+  --tone-2: var(--coral);
+  --tone-3: var(--white);
+  --tone-4: color-mix(in oklab, var(--turquoise) 55%, var(--teal));
+  --piece-edge: color-mix(in oklab, var(--teal) 18%, transparent);
+
+  /* Where a dragged piece would land */
+  --ghost-fits: color-mix(in oklab, var(--turquoise) 50%, transparent);
+  --ghost-blocked: color-mix(in oklab, var(--coral) 40%, transparent);
+
+  /* Shape and depth */
+  --piece-gap: 3px;
+  --piece-radius: 6px;
+  --board-radius: 10px;
+  --lift-shadow: 0 14px 28px -10px color-mix(in oklab, var(--teal) 55%, transparent);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --settle: 220ms;
+
+  /* Type. Placeholder system font; each design direction brings its own. */
+  --font-ui: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
