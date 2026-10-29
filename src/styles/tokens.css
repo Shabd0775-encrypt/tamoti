@@ -19,9 +19,12 @@
   --ink-soft: color-mix(in oklab, var(--teal) 78%, var(--white));
   --rule: color-mix(in oklab, var(--teal) 14%, transparent);
 
-  /* The board */
+  /* The board: a frame, with each cell set into it */
   --board: color-mix(in oklab, var(--spring) 75%, var(--white));
-  --cell-line: color-mix(in oklab, var(--teal) 10%, transparent);
+  --frame: var(--white);
+  --cell: var(--spring);
+  --cell-shade: color-mix(in oklab, var(--teal) 35%, transparent);
+  --cell-line-strong: color-mix(in oklab, var(--teal) 22%, transparent);
   --blocked: var(--teal);
 
   /* Pieces take one of four tones */

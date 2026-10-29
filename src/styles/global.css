@@ -1,4 +1,4 @@
-/* Page-wide basics, then the play screen. */
+/* Page-wide basics, then the library, then the play screen. */
 
 *,
 *::before,
@@ -21,6 +21,11 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+h1,
+h2 {
+  text-wrap: balance;
+}
+
 ::selection {
   background: var(--turquoise);
   color: var(--teal);
@@ -37,25 +42,236 @@ button {
   cursor: pointer;
 }
 
-/* ---------- Play screen layout ---------- */
+/* Anything sitting on a board is placed with four numbers: row, column, width, height. */
+.on-board {
+  position: absolute;
+  left: calc(var(--c) * 100% / var(--size));
+  top: calc(var(--r) * 100% / var(--size));
+  width: calc(var(--w) * 100% / var(--size));
+  height: calc(var(--h) * 100% / var(--size));
+}
+
+/* ========== Library ========== */
+
+.library {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 48px 16px 80px;
+}
+
+.library-intro {
+  max-width: 52ch;
+  margin-bottom: 40px;
+}
+
+.library-intro h1 {
+  margin: 0 0 8px;
+  font-size: clamp(2rem, 6vw, 3rem);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.library-intro p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 1.0625rem;
+}
+
+.size-picker {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 40px;
+}
+
+.size-picker button {
+  display: grid;
+  gap: 2px;
+  padding: 12px 8px;
+  border: 1px solid var(--rule);
+  border-radius: var(--board-radius);
+  background: transparent;
+  text-align: center;
+  transition: background-color 160ms var(--ease-out);
+}
+
+.size-picker button:hover {
+  background: var(--board);
+}
+
+.size-picker button[aria-pressed='true'] {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: var(--white);
+}
+
+.size-name {
+  font-size: 1.125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.size-meta {
+  font-size: 0.8125rem;
+  opacity: 0.8;
+  font-variant-numeric: tabular-nums;
+}
+
+.piece-set {
+  --set-cell: min(calc(240px / var(--size)), 26px);
+  margin-bottom: 56px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.piece-set h2,
+.tier-head h2 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.piece-set-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px 20px;
+  margin: 20px 0 16px;
+}
+
+.piece-set figure {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+.piece-set .piece {
+  width: calc(var(--w) * var(--set-cell));
+  height: calc(var(--h) * var(--set-cell));
+  cursor: default;
+}
+
+.piece-set figcaption {
+  color: var(--ink-soft);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.piece-set-progress {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.tier {
+  margin-bottom: 48px;
+}
+
+.tier-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 16px;
+  margin-bottom: 16px;
+}
+
+.tier-head p {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.puzzle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: 20px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.puzzle-tile {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+}
+
+.mini-board {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 6px;
+  background-color: var(--board);
+  background-image:
+    linear-gradient(var(--cell-line-strong) 1px, transparent 1px),
+    linear-gradient(90deg, var(--cell-line-strong) 1px, transparent 1px);
+  background-size: calc(100% / var(--size)) calc(100% / var(--size));
+  box-shadow: inset 0 0 0 1px var(--cell-line-strong);
+  transition:
+    transform 220ms var(--ease-out),
+    box-shadow 220ms var(--ease-out);
+}
+
+.mini-blocked {
+  background: var(--blocked);
+  border-radius: 2px;
+}
+
+.puzzle-tile:hover .mini-board {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 0 0 1px var(--cell-line-strong),
+    0 8px 18px -10px color-mix(in oklab, var(--teal) 60%, transparent);
+}
+
+.puzzle-tile.is-solved .mini-board {
+  background-color: color-mix(in oklab, var(--turquoise) 45%, var(--white));
+}
+
+.puzzle-number {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.puzzle-tile.is-solved .puzzle-number {
+  color: var(--ink-soft);
+}
+
+@media (max-width: 560px) {
+  .size-picker {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .puzzle-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px 12px;
+  }
+}
+
+/* ========== Play screen ========== */
 
 .play {
   /* The board is as big as the screen allows. Cell sizes follow from it. */
-  --board-size: min(100vw - 32px, 64dvh, 560px);
-  --cell: calc(var(--board-size) / var(--size));
-  --tray-cell: min(calc(var(--cell) * 0.6), 34px);
+  --board-size: min(100vw - 52px, 62dvh, 560px);
+  --cell-size: calc(var(--board-size) / var(--size));
+  --tray-cell: min(calc(var(--cell-size) * 0.6), 34px);
 
   max-width: 1040px;
   margin: 0 auto;
-  padding: 24px 16px 48px;
+  padding: 20px 16px 48px;
 }
 
 .play-bar {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px 24px;
+  align-items: center;
+  gap: 8px 20px;
   margin-bottom: 24px;
 }
 
@@ -63,25 +279,33 @@ button {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 600;
-}
-
-.sizes {
-  display: flex;
-  gap: 4px;
-}
-
-.sizes button {
-  padding: 6px 12px;
-  border: 1px solid var(--rule);
-  border-radius: 999px;
-  background: transparent;
   font-variant-numeric: tabular-nums;
 }
 
-.sizes button[aria-pressed='true'] {
-  background: var(--teal);
-  border-color: var(--teal);
-  color: var(--white);
+.play-number {
+  color: var(--ink-soft);
+  font-weight: 400;
+}
+
+.play-tier {
+  margin-left: auto;
+  color: var(--ink-soft);
+  font-size: 0.9375rem;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: -8px;
+  padding: 6px 12px 6px 6px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+}
+
+.back:hover {
+  background: var(--board);
 }
 
 .play-area {
@@ -92,7 +316,7 @@ button {
 
 @media (min-width: 900px) {
   .play-area {
-    grid-template-columns: var(--board-size) minmax(240px, 320px);
+    grid-template-columns: auto minmax(240px, 320px);
     align-items: start;
     gap: 48px;
   }
@@ -100,15 +324,23 @@ button {
 
 /* ---------- Board ---------- */
 
+/* The frame around the grid. */
 .board {
+  width: fit-content;
+  padding: 10px;
+  border-radius: calc(var(--board-radius) + 4px);
+  background: var(--frame);
+  box-shadow: 0 18px 40px -24px color-mix(in oklab, var(--teal) 70%, transparent);
+}
+
+.board-grid {
   position: relative;
   width: var(--board-size);
   aspect-ratio: 1;
-  border-radius: var(--board-radius);
-  background: var(--board);
   touch-action: none;
 }
 
+/* Every empty cell is its own small recessed square, so the grid reads clearly. */
 .cells {
   display: grid;
   grid-template-columns: repeat(var(--size), 1fr);
@@ -116,17 +348,10 @@ button {
 }
 
 .cells span {
-  border-right: 1px solid var(--cell-line);
-  border-bottom: 1px solid var(--cell-line);
-}
-
-/* Anything sitting on the board is placed with four numbers: row, column, width, height. */
-.on-board {
-  position: absolute;
-  left: calc(var(--c) * 100% / var(--size));
-  top: calc(var(--r) * 100% / var(--size));
-  width: calc(var(--w) * 100% / var(--size));
-  height: calc(var(--h) * 100% / var(--size));
+  margin: 2px;
+  border-radius: 4px;
+  background: var(--cell);
+  box-shadow: inset 0 1px 2px var(--cell-shade);
 }
 
 .blocked {
@@ -177,7 +402,9 @@ button {
   height: 100%;
   border-radius: var(--piece-radius);
   background: var(--tone);
-  box-shadow: inset 0 0 0 1px var(--piece-edge);
+  box-shadow:
+    inset 0 0 0 1px var(--piece-edge),
+    0 2px 3px -1px color-mix(in oklab, var(--teal) 30%, transparent);
 }
 
 .piece[data-tone='1'] { --tone: var(--tone-1); }
@@ -236,7 +463,7 @@ button {
 .status {
   margin: 20px 0 0;
   color: var(--ink-soft);
-  max-width: 34ch;
+  max-width: 36ch;
 }
 
 .status strong {
@@ -254,15 +481,25 @@ button {
 
 .actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-top: 20px;
 }
 
 .actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   padding: 8px 16px;
   border: 1px solid var(--rule);
   border-radius: 999px;
   background: var(--white);
+}
+
+.actions button.primary {
+  border-color: var(--teal);
+  background: var(--teal);
+  color: var(--white);
 }
 
 .actions button:disabled {
@@ -273,5 +510,9 @@ button {
 @media (prefers-reduced-motion: reduce) {
   .board .piece .piece-body {
     animation: none;
+  }
+
+  .mini-board {
+    transition: none;
   }
 }
