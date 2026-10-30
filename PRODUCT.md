@@ -45,9 +45,10 @@ A calm alternative to the feed, not another attention trap. Puzzles are generate
 
 ## Brand Commitments
 
-- **Fixed palette (binding):** White `#FFFFFF`, Turquoise `#8CBEBF`, Coral `#E5765C`, Teal `#344C4B`, Spring `#DFE0C3`. Only these colors and tints or shades derived from them.
+- **Visual direction (chosen 2026-10-30):** Japanese ink-wash (sumi-e) and watercolor with cherry blossoms, lit by alpine glow. Mostly paper and ink grays with lots of empty space, sakura pink as the one accent, a red 桜 seal as the only loud element. References in `design-reference/`.
+- **Palette (binding):** the tokens in `src/styles/tokens.css`: paper, ink 900–300, mist, mist-teal, teal-deep, sakura 100–700, glow 100–300, seal-red. Only these colors and mixes of them.
 - **Tone:** soothing, unhurried, quietly curious, never loud or gamified.
-- **Design process:** six distinct design philosophies are built on the playable game, with a toggle to switch between them. The user picks one direction, which is then refined.
+- **Design process:** the hero is built first and reviewed, then each remaining section one at a time. Painted illustrations (branches, landscapes) are artwork in named image slots, not drawn in CSS.
 
 ## Evidence on Hand
 

@@ -1,53 +1,83 @@
 /*
   Design tokens: every color, size and timing the game uses, named by its job.
   Components only ever use these names (like var(--blocked)), never raw colors.
-  That's what will let each of the six design directions restyle the whole
-  game by swapping this one list.
+
+  The look: an ink-wash (sumi-e) and watercolor painting with cherry blossoms,
+  lit by alpine glow, the rose light that touches snowy peaks at dawn and dusk.
+  Mostly paper and ink grays. Sakura pink is the one accent, and the red seal
+  is the only loud thing on the page.
+
+  Contrast on paper (WCAG AA needs 4.5 for body text, 3 for large text):
+    ink-900 15.5 · ink-700 9.1 · teal-deep 4.4 · sakura-700 5.0 · seal-red 5.7
+    ink-500 3.9 and sakura-500 2.9: large or decorative text only.
 */
 
 :root {
-  /* The fixed palette. Only these five, plus mixes of them. */
-  --white: #ffffff;
-  --turquoise: #8cbebf;
-  --coral: #e5765c;
-  --teal: #344c4b;
-  --spring: #dfe0c3;
+  /* Paper */
+  --paper: #f7f4ef;
+  --paper-warm: #f2ece1;
+
+  /* Ink, from a full brush to a dry one */
+  --ink-900: #1e1c1b;
+  --ink-700: #45423f;
+  --ink-500: #7d7a76;
+  --ink-300: #b9b7b3;
+
+  /* Mist and water */
+  --mist: #e4e6e6;
+  --mist-teal: #a9d3d8;
+  --teal-deep: #3f7a84;
+
+  /* Cherry blossom: the accent, used sparingly */
+  --sakura-100: #fbe3e8;
+  --sakura-300: #f2a7b8;
+  --sakura-500: #e26a8a;
+  --sakura-700: #b83a5c;
+
+  /* Alpine glow: the warm rose-apricot light on the lit face of a peak */
+  --glow-100: #fce8df;
+  --glow-300: #f1b9b0;
+
+  /* The hanko seal */
+  --seal-red: #b7282e;
 
   /* Surfaces and text */
-  --page: color-mix(in oklab, var(--spring) 28%, var(--white));
-  --ink: var(--teal);
-  --ink-soft: color-mix(in oklab, var(--teal) 78%, var(--white));
-  --rule: color-mix(in oklab, var(--teal) 14%, transparent);
+  --page: var(--paper);
+  --ink: var(--ink-900);
+  --ink-soft: var(--ink-700);
+  --rule: color-mix(in oklab, var(--ink-900) 12%, transparent);
 
   /* The board: a frame, with each cell set into it */
-  --board: color-mix(in oklab, var(--spring) 75%, var(--white));
-  --frame: var(--white);
-  --cell: var(--spring);
-  --cell-shade: color-mix(in oklab, var(--teal) 35%, transparent);
-  --cell-line-strong: color-mix(in oklab, var(--teal) 22%, transparent);
-  --blocked: var(--teal);
+  --board: var(--paper-warm);
+  --frame: var(--paper);
+  --cell: var(--mist);
+  --cell-shade: color-mix(in oklab, var(--ink-700) 30%, transparent);
+  --cell-line-strong: color-mix(in oklab, var(--ink-700) 20%, transparent);
+  --blocked: var(--ink-700);
 
   /* Pieces take one of four tones */
-  --tone-1: var(--turquoise);
-  --tone-2: var(--coral);
-  --tone-3: var(--white);
-  --tone-4: color-mix(in oklab, var(--turquoise) 55%, var(--teal));
-  --piece-edge: color-mix(in oklab, var(--teal) 18%, transparent);
+  --tone-1: var(--mist-teal);
+  --tone-2: var(--sakura-300);
+  --tone-3: var(--paper);
+  --tone-4: var(--ink-300);
+  --piece-edge: color-mix(in oklab, var(--ink-900) 16%, transparent);
 
   /* Where a dragged piece would land */
-  --ghost-fits: color-mix(in oklab, var(--turquoise) 50%, transparent);
-  --ghost-blocked: color-mix(in oklab, var(--coral) 40%, transparent);
+  --ghost-fits: color-mix(in oklab, var(--mist-teal) 60%, transparent);
+  --ghost-blocked: color-mix(in oklab, var(--sakura-500) 40%, transparent);
 
   /* Shape and depth */
   --piece-gap: 3px;
   --piece-radius: 6px;
   --board-radius: 10px;
-  --lift-shadow: 0 14px 28px -10px color-mix(in oklab, var(--teal) 55%, transparent);
+  --lift-shadow: 0 14px 28px -10px color-mix(in oklab, var(--ink-900) 45%, transparent);
 
-  /* Motion */
+  /* Motion: slow and quiet */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --settle: 220ms;
+  --reveal: 900ms;
 
-  /* Type. Placeholder system font; each design direction brings its own. */
-  --font-ui: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* Type: a brush-like mincho for display, a soft gothic for reading */
+  --font-display: 'Shippori Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+  --font-ui: 'Zen Kaku Gothic New', 'Hiragino Sans', system-ui, sans-serif;
 }

@@ -1,0 +1,495 @@
+/*
+  The hero: a painting you arrive in. Back to front:
+    paper + alpine glow → mountains, buildings and mist → the tree on its hill
+    → fade to paper → petals → words.
+  Each layer is absolutely positioned inside .hero; z-index sets the stacking.
+  The tree and the peak hold the left; the words and the board sit on the right.
+*/
+
+.hero {
+  /* Mountain tones, mixed from the palette: paler and bluer with distance. */
+  --mtn-snow: color-mix(in oklab, var(--mist) 70%, var(--paper));
+  /* The far ranges and hills take on a little of the rose light. */
+  --mtn-far: color-mix(in oklab, var(--sakura-100) 30%, color-mix(in oklab, var(--mist-teal) 18%, var(--mist)));
+  --mtn-peak: color-mix(in oklab, var(--ink-300) 70%, var(--mist-teal));
+  --mtn-mid: color-mix(in oklab, var(--ink-300) 70%, var(--sakura-300) 14%);
+  --mtn-near: color-mix(in oklab, var(--ink-500) 85%, var(--teal-deep));
+  --gutter: clamp(16px, 6vw, 112px);
+
+  position: relative;
+  isolation: isolate;
+  height: max(680px, 100svh);
+  overflow: hidden;
+  /* Dusk: the sky warms toward the top, then settles to paper. */
+  background: linear-gradient(to bottom, color-mix(in oklab, var(--glow-100) 85%, var(--sakura-100)) 0%, var(--paper) 64%);
+}
+
+.wash-filters {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+/* Alpine glow in the air: a warm blush behind the peak, as if the sun is just below the horizon. */
+.hero-glow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 36% 34% at 38% 36%, color-mix(in oklab, var(--glow-300) 55%, transparent) 0%, transparent 72%),
+    radial-gradient(ellipse 80% 26% at 44% 64%, color-mix(in oklab, var(--sakura-100) 80%, transparent) 0%, transparent 70%);
+}
+
+/* ---------- Mountains, buildings and mist ---------- */
+
+.mountains {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: 1;
+  width: 100%;
+  aspect-ratio: 1600 / 1000;
+  pointer-events: none;
+}
+
+.mtn-layer,
+.mist {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* Each layer gets its own compositing layer, so moving it doesn't repaint the filters. */
+  will-change: transform;
+}
+
+.mist {
+  inset: auto -25%;
+  width: 150%;
+  height: 20%;
+  background: radial-gradient(
+    ellipse 50% 50% at 50% 50%,
+    var(--paper) 0%,
+    color-mix(in oklab, var(--paper) 70%, transparent) 38%,
+    transparent 72%
+  );
+  animation: mist-drift 70s ease-in-out infinite alternate;
+}
+
+.mist-high {
+  top: 50%;
+}
+
+.mist-low {
+  top: 70%;
+  height: 24%;
+  animation-duration: 95s;
+  animation-direction: alternate-reverse;
+}
+
+/* The reflection stretches downward from the shoreline (y 790 of 1000) as the page scrolls. */
+.reflection {
+  transform-origin: 50% 79%;
+}
+
+/* `translate` is separate from `transform`, so the drift and the scroll parallax add together. */
+@keyframes mist-drift {
+  from {
+    translate: -7% 0;
+  }
+  to {
+    translate: 7% 0;
+  }
+}
+
+/* ---------- The tree and the petals ---------- */
+
+.hero-tree-wrap {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: 3;
+  width: min(56vw, 98svh, 1000px);
+  /* Multiply makes the tree behave like paint: its washes glaze over the mountains behind. */
+  mix-blend-mode: multiply;
+  will-change: transform;
+}
+
+.hero-tree {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* The crown may grow past the drawing's own box; the edge of the hero crops it instead. */
+  overflow: visible;
+}
+
+/* The bottom of the painting dissolves into the page below: no hard edge. */
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 4;
+  height: 9%;
+  background: linear-gradient(to bottom, transparent, var(--paper) 92%);
+  pointer-events: none;
+}
+
+.petals {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* ---------- Words and the board ---------- */
+
+/*
+  The right-hand column is a small grid. Each version arranges the same four
+  things (title, sentence, board, actions) a little differently.
+*/
+.hero-copy {
+  position: absolute;
+  top: clamp(96px, 19svh, 210px);
+  right: var(--gutter);
+  z-index: 6;
+  display: grid;
+  grid-template-columns: clamp(150px, 14vw, 210px) 1fr;
+  grid-template-areas:
+    'title title'
+    'lede lede'
+    'board actions';
+  gap: 32px clamp(24px, 2.6vw, 40px);
+  width: min(620px, 44vw);
+}
+
+.hero-title-row {
+  grid-area: title;
+  display: flex;
+  align-items: flex-end;
+  gap: clamp(14px, 1.4vw, 22px);
+}
+
+.hero h1 {
+  margin: 0;
+  color: var(--ink-900);
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 5.6vw, 5.75rem);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+/* Stamped slightly crooked, by hand, beside the name. */
+.hero-seal {
+  flex: none;
+  width: clamp(32px, 3vw, 46px);
+  height: auto;
+  margin-bottom: 0.7em;
+  rotate: -4deg;
+}
+
+.hero-lede {
+  grid-area: lede;
+  max-width: 34ch;
+  margin: 0;
+  color: var(--ink-700);
+  font-size: 1.125rem;
+  line-height: 1.85;
+}
+
+/* The next puzzle, painted. Pressing it opens the puzzle; on hover the ink deepens. */
+.board-preview {
+  grid-area: board;
+  display: grid;
+  gap: 6px;
+  align-self: start;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  text-align: left;
+}
+
+.board-preview svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: transform 800ms var(--ease-out);
+}
+
+.board-paper {
+  fill: var(--paper-warm);
+}
+
+.board-lines path {
+  stroke: var(--ink-300);
+  stroke-width: 3;
+}
+
+.board-frame {
+  fill: none;
+  stroke: var(--ink-900);
+  stroke-width: 10;
+  opacity: 0.78;
+}
+
+.board-blocked {
+  fill: var(--ink-700);
+  transition: fill 600ms var(--ease-out);
+}
+
+.board-preview:hover svg {
+  transform: scale(1.025) rotate(-0.6deg);
+}
+
+.board-preview:hover .board-blocked {
+  fill: var(--ink-900);
+}
+
+.board-caption {
+  color: var(--ink-700);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+}
+
+.hero-actions {
+  grid-area: actions;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: center;
+  gap: 18px;
+}
+
+/* A button painted with one stroke of ink. On hover the ink spreads a little. */
+.brush-button {
+  position: relative;
+  padding: 18px 42px;
+  border: 0;
+  border-radius: 48px;
+  background: none;
+  color: var(--paper);
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.brush-stroke {
+  position: absolute;
+  inset: -4px -8px;
+  width: calc(100% + 16px);
+  height: calc(100% + 8px);
+  fill: var(--ink-900);
+  transform-origin: 40% 50%;
+  transition:
+    transform 800ms var(--ease-out),
+    opacity 800ms var(--ease-out);
+}
+
+.brush-button span {
+  position: relative;
+}
+
+.brush-button:hover .brush-stroke {
+  transform: scale(1.05, 1.14);
+  opacity: 0.92;
+}
+
+.brush-button:active .brush-stroke {
+  transform: scale(0.98, 0.96);
+  transition-duration: 150ms;
+}
+
+.brush-button:focus-visible {
+  outline-offset: 10px;
+}
+
+.hero-more {
+  color: var(--ink-700);
+  text-decoration: underline;
+  text-decoration-color: var(--sakura-300);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 7px;
+  transition:
+    color 400ms var(--ease-out),
+    text-decoration-color 400ms var(--ease-out);
+}
+
+.hero-more:hover {
+  color: var(--ink-900);
+  text-decoration-color: var(--sakura-500);
+}
+
+/* A column of calligraphy at the right edge, the way a poem sits in a painting. */
+.hero-vertical {
+  position: absolute;
+  top: clamp(96px, 19svh, 210px);
+  right: clamp(14px, 2vw, 36px);
+  z-index: 6;
+  margin: 0;
+  writing-mode: vertical-rl;
+  color: var(--ink-500);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  letter-spacing: 0.42em;
+  line-height: 1;
+}
+
+/* Arrival: each part bleeds in like ink touching wet paper, one after another. */
+.hero-title-row,
+.hero-lede,
+.board-preview,
+.hero-actions,
+.hero-vertical {
+  animation: ink-in var(--reveal) var(--ease-out) both;
+}
+
+.hero-lede {
+  animation-delay: 140ms;
+}
+
+.board-preview {
+  animation-delay: 260ms;
+}
+
+.hero-actions {
+  animation-delay: 360ms;
+}
+
+.hero-vertical {
+  animation-delay: 480ms;
+  animation-duration: 1400ms;
+}
+
+@keyframes ink-in {
+  from {
+    opacity: 0;
+    filter: blur(8px);
+    transform: scale(0.985);
+  }
+}
+
+/* ---------- Narrower laptops and tablets: the words need more of the width ---------- */
+
+@media (max-width: 1100px) and (min-width: 721px) {
+  .hero-copy {
+    width: min(560px, 58vw);
+  }
+
+  .hero-tree-wrap {
+    width: min(62vw, 90svh);
+  }
+}
+
+/* Tall tablets: enlarge the range so it fills the lower half. */
+@media (min-width: 721px) and (max-aspect-ratio: 4 / 3) {
+  .mountains {
+    width: 150vw;
+    left: -20vw;
+    bottom: -8%;
+  }
+
+  .hero-tree-wrap {
+    width: 74vw;
+  }
+}
+
+/* ---------- Phones: the painting is re-framed, not shrunk ---------- */
+
+@media (max-width: 720px) {
+  .hero {
+    --gutter: 20px;
+  }
+
+  /*
+    Words at the top in the open sky, the tree and its hill along the bottom,
+    the peak rising between them, the lake in the lower right. The range is
+    drawn much wider than the screen and slid so the peak sits left of
+    centre with the water to its right.
+  */
+  .mountains {
+    width: 250vw;
+    left: -62vw;
+    bottom: -4%;
+  }
+
+  .hero-tree-wrap {
+    width: 100vw;
+    left: -6vw;
+    bottom: -5svh;
+  }
+
+  .hero-copy {
+    top: max(84px, 11svh);
+    left: var(--gutter);
+    right: var(--gutter);
+    width: auto;
+    grid-template-columns: 112px 1fr;
+    grid-template-areas:
+      'title title'
+      'lede lede'
+      'board actions';
+    gap: 20px 24px;
+  }
+
+  .hero h1 {
+    font-size: clamp(2.75rem, 13vw, 4rem);
+  }
+
+  .hero-lede {
+    font-size: 1.0625rem;
+  }
+
+  .board-caption {
+    font-size: 0.8125rem;
+  }
+
+  .brush-button {
+    padding: 15px 30px;
+    font-size: 0.9375rem;
+  }
+
+  .hero-vertical,
+  .birds {
+    display: none;
+  }
+
+}
+
+/* ---------- Less motion: keep the painting, drop the travel ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .mist {
+    animation: none;
+  }
+
+  .hero-title-row,
+  .hero-lede,
+  .board-preview,
+  .hero-actions,
+  .hero-vertical {
+    animation-name: fade-in;
+  }
+
+  .brush-stroke,
+  .board-preview svg {
+    transition: opacity 200ms;
+  }
+
+  .brush-button:hover .brush-stroke,
+  .brush-button:active .brush-stroke,
+  .board-preview:hover svg {
+    transform: none;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
