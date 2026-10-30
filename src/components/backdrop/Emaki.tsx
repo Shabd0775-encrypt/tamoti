@@ -394,6 +394,8 @@ export function Emaki() {
   useEffect(() => {
     const el = stage.current?.parentElement
     if (!el || !stage.current) return
+    // Browsers with scroll-linked animations do all of this in CSS (see .emaki in library.css).
+    if (CSS.supports('animation-timeline: view()')) return
     // How far each sheet slides across its width: far ones a little, near ones all the way.
     const sheets: Array<[SVGSVGElement, number]> = [
       [stage.current.querySelector<SVGSVGElement>('.emaki-far')!, 0.45],
