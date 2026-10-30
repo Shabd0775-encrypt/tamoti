@@ -653,9 +653,10 @@
 
 /* ---------- The close ---------- */
 
+/* The painting's hills fill the lower part of the screen at the very end: the words sit in the sky above them. */
 .site-footer {
   position: relative;
-  padding: 120px 0 88px;
+  padding: 120px 0 38vh;
 }
 
 .footer-inner {
@@ -747,7 +748,6 @@
     gap: 20px 14px;
   }
 
-  /* On a phone the painting's hills and trees fill the bottom third: the words sit above them. */
   .site-footer {
     padding: 110px 0 36vh;
   }
@@ -822,8 +822,8 @@
 .emaki-layer {
   position: absolute;
   left: 0;
-  /* Set low, so the landscape fills the bottom of the screen and the reading area above stays clear. */
-  bottom: -16vh;
+  /* Set a little low, so the landscape fills the lower part of the screen and the words above stay clear. */
+  bottom: -7vh;
   height: 100%;
   width: auto;
   aspect-ratio: 4.8 / 1;
@@ -850,8 +850,8 @@
    Smaller, lower and a little paler, it stays behind the words. */
 @media (max-width: 720px) {
   .emaki-layer {
-    bottom: -12vh;
-    height: 72%;
+    bottom: -5vh;
+    height: 74%;
   }
 
   .emaki-far,
@@ -861,13 +861,20 @@
   }
 }
 
-/* A band of mist between the far peaks and the hills, drifting slowly. */
+/* Bands of mist drifting between the sheets, as in the hero: one below the peaks, one below the hills. */
 .emaki-mist {
   position: absolute;
-  inset: auto -20% 10vh;
-  height: 22vh;
+  inset: auto -20% 20vh;
+  height: 20vh;
   background: radial-gradient(ellipse 50% 50% at 50% 50%, color-mix(in oklab, var(--paper) 85%, transparent), transparent 72%);
   animation: mist-drift 80s ease-in-out infinite alternate;
+}
+
+.emaki-mist-low {
+  bottom: 4vh;
+  height: 18vh;
+  animation-duration: 105s;
+  animation-direction: alternate-reverse;
 }
 
 @media (prefers-reduced-motion: reduce) {

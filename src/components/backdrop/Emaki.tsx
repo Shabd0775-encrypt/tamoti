@@ -12,98 +12,62 @@
 
 import { useEffect, useRef, type JSX } from 'react'
 import { seededRandom } from '../../game/rng'
-import { Fade, InkedRidge, Pagoda } from '../hero/painting'
-import { heightAt, lineTo, ridge, taper, type Point } from '../hero/ridge'
+import { Fade, InkedRidge, Pagoda, Peak } from '../hero/painting'
+import { heightAt, ridge, silhouette, taper, type Point } from '../hero/ridge'
 import { blob } from '../hero/treeParts'
 
 const W = 4800
 const H = 1000
 
-/**
- * Landforms here are soft: a few control points, nudged only slightly, so
- * hills and peaks roll and rise instead of zig-zagging. (The hero's ridges
- * are rougher on purpose; out here, behind the words, calm reads better.)
+/*
+ * Every landform here is painted with the hero's own brushes, so the two
+ * read as one painting: ridgelines roughened the same way, the same washes,
+ * ink gathered along each ridge, and the hero's snow peak placed again at
+ * other sizes. Hills have a clear summit every short stretch, never a long
+ * flat run.
  */
-const soft = (points: Point[], seed: number) => ridge(points, 0.05, seed, 3)
 
-/** A filled landform whose top edge is drawn as smooth curves through its points. */
-function smooth(points: Point[], bottom: number): string {
-  const [first] = points
-  const last = points[points.length - 1]
-  let d = `M${first[0]} ${bottom}L${first[0]} ${first[1]}`
-  for (let i = 1; i < points.length - 1; i++) {
-    const [x, y] = points[i]
-    const [nx, ny] = points[i + 1]
-    d += `Q${x.toFixed(1)} ${y.toFixed(1)} ${((x + nx) / 2).toFixed(1)} ${((y + ny) / 2).toFixed(1)}`
-  }
-  return `${d}L${last[0]} ${last[1]}L${last[0]} ${bottom}Z`
-}
+/* ---------- Far: the distant range, snow peaks in alpine glow, birds ---------- */
 
-/* ---------- Far: peaks in alpine glow, the distant range, birds ---------- */
-
-const range = soft(
+const range = ridge(
   [
-    [-40, 660],
-    [400, 560],
-    [900, 620],
-    [1500, 540],
-    [2100, 640],
-    [2700, 600],
-    [3300, 540],
-    [3900, 610],
-    [4400, 560],
-    [4840, 630],
+    [-40, 640],
+    [180, 560],
+    [420, 610],
+    [700, 540],
+    [980, 600],
+    [1300, 520],
+    [1600, 590],
+    [1900, 610],
+    [2300, 550],
+    [2650, 600],
+    [3000, 530],
+    [3350, 590],
+    [3700, 560],
+    [4050, 610],
+    [4400, 540],
+    [4840, 620],
   ],
+  0.18,
   91,
 )
 
-type PeakSpot = { x: number; top: number; spread: number; seed: number }
-const peaks: PeakSpot[] = [
-  { x: 520, top: 400, spread: 420, seed: 1 },
-  { x: 1080, top: 470, spread: 330, seed: 2 },
-  { x: 3820, top: 430, spread: 400, seed: 3 },
+/** Snow peaks along the scroll: summit (x, top), size, and a seed so each has its own ridgelines. */
+const peaks = [
+  { x: 560, top: 330, scale: 0.8, seed: 21 },
+  { x: 1300, top: 420, scale: 0.6, seed: 31 },
+  { x: 2600, top: 450, scale: 0.55, seed: 41 },
+  { x: 3950, top: 350, scale: 0.75, seed: 51 },
 ]
-
-/** A peak's outline, and its lit face: down the left ridge and back up a ragged line beside the summit. */
-function peakShape({ x, top, spread, seed }: PeakSpot) {
-  const left = soft(
-    [
-      [x - spread, 680],
-      [x - spread * 0.45, 500],
-      [x, top],
-    ],
-    seed * 10,
-  )
-  const right = soft(
-    [
-      [x, top],
-      [x + spread * 0.5, 470],
-      [x + spread, 690],
-    ],
-    seed * 10 + 1,
-  )
-  const outline = [...left, ...right.slice(1)]
-  const shadow = soft(
-    [
-      [x, top],
-      [x - spread * 0.1, top + 120],
-      [x - spread * 0.25, top + 240],
-      [x - spread * 0.45, 640],
-    ],
-    seed * 10 + 2,
-  )
-  const lit = `M${x} ${top}${lineTo([...left].reverse().slice(1))}${lineTo([...shadow].reverse())}Z`
-  return { outline, lit }
-}
 
 /** Birds far off, each a flick of the brush: x, y and size. */
 const birds = [
-  [700, 200, 1],
-  [760, 236, 0.75],
-  [810, 212, 0.6],
-  [2600, 260, 0.9],
-  [2660, 282, 0.7],
-  [4300, 230, 0.8],
+  [760, 200, 1],
+  [820, 236, 0.75],
+  [870, 212, 0.6],
+  [2400, 260, 0.9],
+  [2460, 282, 0.7],
+  [4350, 230, 0.8],
 ]
 
 function Far() {
@@ -112,56 +76,20 @@ function Far() {
       <defs>
         <Fade
           id="ek-range"
-          y1={540}
+          y1={520}
           y2={860}
           stops={[
             [0, 'var(--mtn-far)'],
             [1, 'var(--mtn-far)', 0],
           ]}
         />
-        <Fade
-          id="ek-peak"
-          y1={300}
-          y2={760}
-          stops={[
-            [0, 'var(--mtn-snow)'],
-            [0.3, 'var(--mtn-peak)'],
-            [1, 'var(--mtn-far)', 0],
-          ]}
-        />
-        <Fade
-          id="ek-lit"
-          y1={300}
-          y2={700}
-          stops={[
-            [0, 'var(--glow-100)'],
-            [0.35, 'var(--glow-300)', 0.95],
-            [1, 'var(--sakura-100)', 0],
-          ]}
-        />
-        <Fade
-          id="ek-ink"
-          y1={300}
-          y2={680}
-          stops={[
-            [0, 'var(--ink-700)', 0.6],
-            [1, 'var(--ink-700)', 0],
-          ]}
-        />
       </defs>
-      <g filter="url(#sheet-edge)">
-        {peaks.map((p, i) => {
-          const { outline, lit } = peakShape(p)
-          return (
-            <g key={i}>
-              <path d={smooth(outline, H)} fill="url(#ek-peak)" />
-              <path d={lit} fill="url(#ek-lit)" filter="url(#glow-wash)" />
-              <InkedRidge id={`ek-peak-${i}`} points={outline} ink="url(#ek-ink)" width={30} />
-            </g>
-          )
-        })}
-        <path d={smooth(range, H)} fill="url(#ek-range)" />
+      <g filter="url(#wash)">
+        <path d={silhouette(range, H)} fill="url(#ek-range)" />
       </g>
+      {peaks.map((p, i) => (
+        <Peak key={i} id={`ek-peak-${i}`} x={p.x} top={p.top} scale={p.scale} seed={p.seed} glow={1} />
+      ))}
       <g filter="url(#ink)" fill="none" strokeLinecap="round" style={{ stroke: 'var(--ink-700)' }}>
         {birds.map(([x, y, s]) => (
           <path
@@ -178,36 +106,49 @@ function Far() {
 /* ---------- Mid: hills, the lake, the torii, the boat, the pagoda, cherry trees ---------- */
 
 const LAKE = 840
-const hillsLeft = soft(
+const hillsLeft = ridge(
   [
-    [-40, 820],
-    [300, 730],
-    [700, 770],
-    [1050, 720],
-    [1400, 860],
-    [1560, LAKE + 30],
+    [-40, 760],
+    [120, 680],
+    [260, 712],
+    [420, 646],
+    [560, 700],
+    [720, 736],
+    [880, 684],
+    [1040, 724],
+    [1200, 792],
+    [1360, 868],
   ],
+  0.25,
   92,
 )
-const hillsRight = soft(
+const hillsRight = ridge(
   [
-    [2980, LAKE + 30],
-    [3150, 800],
-    [3400, 730],
-    [3700, 690],
-    [4050, 750],
-    [4400, 710],
-    [4840, 760],
+    [3000, 868],
+    [3140, 780],
+    [3300, 716],
+    [3460, 758],
+    [3620, 676],
+    [3780, 708],
+    [3940, 650],
+    [4120, 716],
+    [4300, 686],
+    [4500, 736],
+    [4660, 690],
+    [4840, 720],
   ],
+  0.25,
   93,
 )
-const island = soft(
+const island = ridge(
   [
     [2120, LAKE + 4],
-    [2200, 818],
-    [2290, 810],
+    [2180, 822],
+    [2250, 808],
+    [2320, 818],
     [2380, LAKE + 4],
   ],
+  0.25,
   94,
 )
 const ripples = [
@@ -218,6 +159,38 @@ const ripples = [
   [2650, 950, 180],
   [2300, 975, 260],
 ]
+
+/** A band of hills in the hero's middle-distance style: a wash fading downward, ink along the ridge. */
+function Hills({ id, points }: { id: string; points: Point[] }) {
+  return (
+    <>
+      <defs>
+        <Fade
+          id={`${id}-fill`}
+          y1={630}
+          y2={940}
+          stops={[
+            [0, 'var(--mtn-mid)'],
+            [1, 'var(--mtn-mid)', 0],
+          ]}
+        />
+        <Fade
+          id={`${id}-ink`}
+          y1={630}
+          y2={860}
+          stops={[
+            [0, 'var(--ink-700)', 0.55],
+            [1, 'var(--ink-700)', 0],
+          ]}
+        />
+      </defs>
+      <g filter="url(#wash)">
+        <path d={silhouette(points, H)} fill={`url(#${id}-fill)`} />
+        <InkedRidge id={`${id}-clip`} points={points} ink={`url(#${id}-ink)`} width={26} />
+      </g>
+    </>
+  )
+}
 
 /** A small cherry tree: a crooked trunk, a few limbs, and a crown of pink blots. */
 function CherryTree({ x, y, scale = 1, seed }: { x: number; y: number; scale?: number; seed: number }) {
@@ -294,24 +267,6 @@ function Mid() {
     <>
       <defs>
         <Fade
-          id="ek-hill"
-          y1={690}
-          y2={960}
-          stops={[
-            [0, 'var(--mtn-mid)'],
-            [1, 'var(--mtn-mid)', 0],
-          ]}
-        />
-        <Fade
-          id="ek-hill-ink"
-          y1={690}
-          y2={880}
-          stops={[
-            [0, 'var(--ink-700)', 0.55],
-            [1, 'var(--ink-700)', 0],
-          ]}
-        />
-        <Fade
           id="ek-lake"
           y1={LAKE}
           y2={H}
@@ -330,25 +285,21 @@ function Mid() {
           ]}
         />
       </defs>
-      <path d={`M1300 ${LAKE}H3150V${H}H1300Z`} fill="url(#ek-lake)" filter="url(#wash)" />
+      {/* The lake: its ends slope away under the hills on either side, so the water has no edge of its own. */}
+      <path d={`M1300 ${LAKE}H3020L3170 ${H}H1180Z`} fill="url(#ek-lake)" filter="url(#wash)" />
       <g filter="url(#dry-brush)" strokeLinecap="round" style={{ stroke: 'var(--ink-300)' }}>
         {ripples.map(([x, y, l]) => (
           <path key={`${x},${y}`} d={`M${x} ${y}h${l}`} strokeWidth={2.4} opacity={0.8} />
         ))}
       </g>
-      <g filter="url(#sheet-edge)">
-        <path d={smooth(island, LAKE + 8)} fill="url(#ek-island)" />
+      <g filter="url(#wash)">
+        <path d={silhouette(island, LAKE + 8)} fill="url(#ek-island)" />
       </g>
       <CherryTree x={2250} y={812} scale={0.8} seed={61} />
       <Torii x={1600} y={LAKE + 8} scale={1.1} />
       <Boat x={2620} y={LAKE + 60} />
-
-      <g filter="url(#sheet-edge)">
-        <path d={smooth(hillsLeft, H)} fill="url(#ek-hill)" />
-        <path d={smooth(hillsRight, H)} fill="url(#ek-hill)" />
-        <InkedRidge id="ek-hills-left" points={hillsLeft} ink="url(#ek-hill-ink)" width={26} />
-        <InkedRidge id="ek-hills-right" points={hillsRight} ink="url(#ek-hill-ink)" width={26} />
-      </g>
+      <Hills id="ek-hills-left" points={hillsLeft} />
+      <Hills id="ek-hills-right" points={hillsRight} />
       <Pagoda id="ek-pagoda" x={3700} y={heightAt(hillsRight, 3700) + 8} scale={1.05} lanterns />
       <CherryTree x={320} y={heightAt(hillsLeft, 320) + 6} seed={62} />
       <CherryTree x={1050} y={heightAt(hillsLeft, 1050) + 6} scale={0.85} seed={63} />
@@ -359,36 +310,41 @@ function Mid() {
   )
 }
 
-/* ---------- Near: dark ink rocks at the bottom edge ---------- */
+/* ---------- Near: dark ink rocks along the bottom edge, as in the hero ---------- */
 
 const rocks = [
-  soft(
+  ridge(
     [
       [-40, 1000],
-      [60, 900],
-      [200, 870],
-      [340, 920],
-      [460, 1000],
+      [80, 900],
+      [220, 860],
+      [360, 890],
+      [520, 960],
+      [620, 1000],
     ],
+    0.3,
     95,
   ),
-  soft(
+  ridge(
     [
-      [2950, 1000],
-      [3080, 930],
-      [3220, 905],
-      [3360, 950],
-      [3480, 1000],
+      [2900, 1000],
+      [3020, 920],
+      [3180, 880],
+      [3320, 910],
+      [3460, 980],
+      [3540, 1000],
     ],
+    0.3,
     96,
   ),
-  soft(
+  ridge(
     [
-      [4380, 1000],
-      [4520, 910],
-      [4680, 890],
-      [4840, 940],
+      [4300, 1000],
+      [4420, 900],
+      [4600, 870],
+      [4840, 900],
     ],
+    0.3,
     97,
   ),
 ]
@@ -399,24 +355,34 @@ function Near() {
       <defs>
         <Fade
           id="ek-rock"
-          y1={870}
-          y2={H}
+          y1={860}
+          y2={990}
           stops={[
-            [0, 'var(--ink-700)', 0.85],
-            [1, 'var(--ink-500)', 0.3],
+            [0, 'var(--mtn-near)', 0.8],
+            [0.55, 'var(--mtn-near)', 0.4],
+            [1, 'var(--mtn-near)', 0],
+          ]}
+        />
+        <Fade
+          id="ek-rock-ink"
+          y1={860}
+          y2={960}
+          stops={[
+            [0, 'var(--ink-900)', 0.45],
+            [1, 'var(--ink-900)', 0],
           ]}
         />
       </defs>
-      <g filter="url(#sheet-edge)">
+      <g filter="url(#wash)">
         {rocks.map((r, i) => (
           <g key={i}>
-            <path d={smooth(r, H)} fill="url(#ek-rock)" />
-            <InkedRidge id={`ek-rock-${i}`} points={r} ink="var(--ink-900)" width={24} />
+            <path d={silhouette(r, H)} fill="url(#ek-rock)" />
+            <InkedRidge id={`ek-rock-${i}`} points={r} ink="url(#ek-rock-ink)" width={30} />
           </g>
         ))}
       </g>
-      <CherryTree x={200} y={878} scale={1.25} seed={71} />
-      <CherryTree x={3230} y={912} scale={1.1} seed={72} />
+      <CherryTree x={220} y={866} scale={1.25} seed={71} />
+      <CherryTree x={3180} y={886} scale={1.1} seed={72} />
     </>
   )
 }
@@ -459,8 +425,9 @@ export function Emaki() {
       <div className="emaki-stage" ref={stage}>
         <div className="emaki-dusk" />
         {sheet('far', <Far />)}
-        <div className="emaki-mist" />
+        <div className="emaki-mist emaki-mist-high" />
         {sheet('mid', <Mid />)}
+        <div className="emaki-mist emaki-mist-low" />
         {sheet('near', <Near />)}
       </div>
     </div>

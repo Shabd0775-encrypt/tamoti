@@ -70,60 +70,67 @@ export function InkedRidge({
 
 /* ---------- The peak ---------- */
 
-// Up the shaded right-hand face, down the sunlit left one.
-const peakRight = ridge(
-  [
-    [1100, 720],
-    [910, 560],
-    [740, 398],
-    [600, 250],
-  ],
-  0.26,
-  11,
-)
-const peakLeft = ridge(
-  [
-    [600, 250],
-    [482, 362],
-    [300, 522],
-    [40, 700],
-  ],
-  0.26,
-  12,
-)
-export const peak = [...peakRight, ...peakLeft.slice(1)]
+/**
+ * A snow peak, as painted in the hero, placed anywhere: its summit at (x, top),
+ * at any scale (1 is the hero's own). Up a shaded right-hand face, down a
+ * sunlit left one; the lit face is bounded by a ragged shadow line; soft wash
+ * streaks run down the shade like gullies of snow and rock. `seed` varies the
+ * ridgelines so no two peaks are the same.
+ */
+function peakGeometry(x: number, top: number, s: number, seed: number) {
+  const at = (dx: number, dy: number): [number, number] => [x + dx * s, top + dy * s]
+  const right = ridge([at(500, 470), at(310, 310), at(140, 148), at(0, 0)], 0.26, seed)
+  const left = ridge([at(0, 0), at(-118, 112), at(-300, 272), at(-560, 450)], 0.26, seed + 1)
+  const outline = [...right, ...left.slice(1)]
+  const litEdge = left.filter(([px]) => px >= x - 330 * s)
+  const shadowLine = ridge([at(0, 0), at(-36, 92), at(-92, 188), at(-160, 280), at(-250, 362)], 0.32, seed + 2)
+  const litFace = `M${x} ${top}${lineTo(litEdge)}${lineTo([...shadowLine].reverse())}Z`
+  const gullies = [120, 138, 152, 164, 175, 186].map((i, n) => {
+    const [gx, gy] = right[i]
+    const length = (90 + ((n * 53) % 110)) * s
+    return `M${gx} ${gy}Q${gx - 22 * s} ${gy + length * 0.5} ${gx - (40 + n * 6) * s} ${gy + length}`
+  })
+  return { outline, litFace, gullies }
+}
 
-// The face that catches the light: down the left ridge, back up a ragged shadow line.
-const litEdge = peakLeft.filter(([x]) => x >= 270)
-const shadowLine = ridge(
-  [
-    [600, 250],
-    [564, 342],
-    [508, 438],
-    [440, 530],
-    [350, 612],
-  ],
-  0.32,
-  13,
-)
-const litFace = `M600 250${lineTo(litEdge)}${lineTo([...shadowLine].reverse())}Z`
+/** The hero's peak: summit at (600, 250) on the 1600 × 1000 canvas. */
+const heroPeak = peakGeometry(600, 250, 1, 11)
+export const peak = heroPeak.outline
 
-// Soft wash streaks down the shaded face, like gullies of snow and rock.
-const gullies = [120, 138, 152, 164, 175, 186].map((i, n) => {
-  const [x, y] = peakRight[i]
-  const length = 90 + ((n * 53) % 110)
-  return `M${x} ${y}Q${x - 22} ${y + length * 0.5} ${x - 40 - n * 6} ${y + length}`
-})
-
-/** The snow peak with alpine glow on its left face. `glow` from 0 (none) to 1 (full dusk). */
-export function Peak({ glow = 0.85 }: { glow?: number }) {
+/**
+ * A snow peak with alpine glow on its left face. `glow` from 0 (none) to 1 (full dusk).
+ * Without a position it's the hero's own peak; `id` keeps each peak's gradients separate.
+ */
+export function Peak({
+  glow = 0.85,
+  id = 'peak',
+  x,
+  top,
+  scale = 1,
+  seed = 11,
+}: {
+  glow?: number
+  id?: string
+  x?: number
+  top?: number
+  scale?: number
+  seed?: number
+}) {
+  const { outline, litFace, gullies } =
+    x === undefined || top === undefined ? heroPeak : peakGeometry(x, top, scale, seed)
+  const summit = top ?? 250
+  const s = x === undefined ? 1 : scale
+  const ids =
+    id === 'peak'
+      ? { fill: 'g-peak', lit: 'g-lit', ink: 'g-ridge-ink', clip: 'clip-peak' }
+      : { fill: `${id}-fill`, lit: `${id}-lit`, ink: `${id}-ink`, clip: `${id}-clip` }
   return (
     <>
       <defs>
         <Fade
-          id="g-peak"
-          y1={250}
-          y2={780}
+          id={ids.fill}
+          y1={summit}
+          y2={summit + 530 * s}
           stops={[
             [0, 'var(--mtn-snow)'],
             [0.22, 'var(--mtn-peak)'],
@@ -132,9 +139,9 @@ export function Peak({ glow = 0.85 }: { glow?: number }) {
           ]}
         />
         <Fade
-          id="g-lit"
-          y1={250}
-          y2={650}
+          id={ids.lit}
+          y1={summit}
+          y2={summit + 400 * s}
           stops={[
             [0, 'var(--glow-100)', glow],
             [0.3, 'var(--glow-300)', glow],
@@ -143,9 +150,9 @@ export function Peak({ glow = 0.85 }: { glow?: number }) {
           ]}
         />
         <Fade
-          id="g-ridge-ink"
-          y1={250}
-          y2={660}
+          id={ids.ink}
+          y1={summit}
+          y2={summit + 410 * s}
           stops={[
             [0, 'var(--ink-700)', 0.7],
             [1, 'var(--ink-700)', 0],
@@ -153,11 +160,11 @@ export function Peak({ glow = 0.85 }: { glow?: number }) {
         />
       </defs>
       <g filter="url(#wash)">
-        <path d={silhouette(peak, H)} fill="url(#g-peak)" />
-        <path d={litFace} fill="url(#g-lit)" filter="url(#glow-wash)" />
-        <InkedRidge id="clip-peak" points={peak} ink="url(#g-ridge-ink)">
+        <path d={silhouette(outline, H)} fill={`url(#${ids.fill})`} />
+        <path d={litFace} fill={`url(#${ids.lit})`} filter="url(#glow-wash)" />
+        <InkedRidge id={ids.clip} points={outline} ink={`url(#${ids.ink})`} width={34 * Math.max(s, 0.7)}>
           {gullies.map((d) => (
-            <path key={d} d={d} strokeWidth="14" strokeOpacity="0.09" style={{ stroke: 'var(--ink-700)' }} />
+            <path key={d} d={d} strokeWidth={14 * s} strokeOpacity="0.09" style={{ stroke: 'var(--ink-700)' }} />
           ))}
         </InkedRidge>
       </g>
