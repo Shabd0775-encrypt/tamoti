@@ -1,12 +1,12 @@
 // The play screen: board, tray, and the controls around them.
 
-import { useEffect, useReducer, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useReducer, useRef, useState, type CSSProperties, type Dispatch } from 'react'
 import { Board } from '../components/Board'
 import { BrushButton } from '../components/BrushButton'
 import { Icon } from '../components/Icon'
 import { LookSwitcher } from '../components/LookSwitcher'
 import { Piece } from '../components/Piece'
-import { PlayScenery } from '../components/PlayScenery'
+import { PlayScenery, SolveGust } from '../components/PlayScenery'
 import { SolutionThumb } from '../components/SolutionThumb'
 import { toneFor } from '../components/tone'
 import { Tray } from '../components/Tray'
@@ -14,8 +14,9 @@ import { clashes, footprint, isSolved } from '../game/board'
 import { dailyPuzzleId } from '../game/daily'
 import { hint, parseSolutionKey, solutionKey } from '../game/hints'
 import { findPuzzle, library, puzzleId, tierNames } from '../game/library'
-import { gameReducer, newGame } from '../state/gameReducer'
+import { gameReducer, newGame, type GameAction } from '../state/gameReducer'
 import type { Go } from '../state/route'
+import { play, useSound } from '../state/sound'
 import { useDrag } from '../state/useDrag'
 
 type Props = {
@@ -38,13 +39,23 @@ function nextPuzzleId(size: number, number: number): string | null {
 
 export function Play({ id, go, found, onSolved }: Props) {
   const entry = findPuzzle(id)!
-  const [state, dispatch] = useReducer(gameReducer, entry.puzzle, newGame)
+  const [state, rawDispatch] = useReducer(gameReducer, entry.puzzle, newGame)
+  const [soundOn, setSoundOn] = useSound()
+  // Every move goes through here, so it can make its sound (when sound is on).
+  const dispatch: Dispatch<GameAction> = (action) => {
+    rawDispatch(action)
+    if (!soundOn) return
+    if (action.type === 'place') play('place')
+    if (action.type === 'rotate') play('turn')
+  }
   const boardRef = useRef<HTMLDivElement>(null)
   const { drag, target, cellSize, startDrag } = useDrag(state, dispatch, boardRef)
   const [shownHint, setShownHint] = useState<ShownHint | null>(null)
   const [shared, setShared] = useState(false)
   /** Whether the way just found was a new one (null until the board is filled). */
   const [newWay, setNewWay] = useState<boolean | null>(null)
+  /** Counts solves on this screen; each one sends a gust of petals. */
+  const [gusts, setGusts] = useState(0)
 
   const { puzzle } = state
   const solved = isSolved(puzzle, state.placements)
@@ -66,8 +77,10 @@ export function Play({ id, go, found, onSolved }: Props) {
     if (recorded.current === key) return
     recorded.current = key
     setNewWay(!found.includes(key))
+    setGusts((g) => g + 1)
+    if (soundOn) play('solve')
     onSolved(id, key)
-  }, [key, found, id, onSolved])
+  }, [key, found, id, onSolved, soundOn])
 
   // A hint only shows until the next move.
   const hintNow = shownHint && shownHint.move === state.history.length ? shownHint : null
@@ -121,6 +134,9 @@ export function Play({ id, go, found, onSolved }: Props) {
           {isDaily && <span className="play-daily">Today's board</span>}
           {tierNames[entry.tier]}
         </span>
+        <button type="button" className="sound-toggle" aria-pressed={soundOn} onClick={() => setSoundOn(!soundOn)}>
+          {soundOn ? 'Sound on' : 'Sound off'}
+        </button>
       </header>
 
       <div className="play-area">
@@ -241,6 +257,7 @@ export function Play({ id, go, found, onSolved }: Props) {
           }}
         />
       )}
+      <SolveGust gust={gusts} />
       <LookSwitcher />
     </main>
   )

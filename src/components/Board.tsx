@@ -61,7 +61,7 @@ export function Board({ ref, state, liftedId, target, onPiecePointerDown, onRota
   const clash = clashes(puzzle, placements)
 
   return (
-    <div className="board">
+    <div className={`board ${solved ? 'is-solved' : ''}`}>
       <BoardSheet />
       <div className="board-grid" ref={ref}>
         <BoardRules size={puzzle.size} />

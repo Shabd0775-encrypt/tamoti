@@ -52,6 +52,14 @@
   z-index: 1;
 }
 
+/* In front of the board and pieces, but never in the way of a click. */
+.solve-gust {
+  position: fixed;
+  inset: 0;
+  z-index: 12;
+  pointer-events: none;
+}
+
 /* ---------- The bar along the top ---------- */
 
 .play-bar {
@@ -94,6 +102,25 @@
   font-family: var(--font-display);
   font-size: 1.0625rem;
   letter-spacing: 0.04em;
+}
+
+/* Sound, off unless asked for: a quiet word at the end of the bar. */
+.sound-toggle {
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--ink-700);
+  font-size: 0.9375rem;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+  transition: text-decoration-color 400ms var(--ease-out);
+}
+
+.sound-toggle:hover,
+.sound-toggle[aria-pressed='true'] {
+  text-decoration-color: var(--sakura-300);
 }
 
 .back {
@@ -172,6 +199,12 @@
 
 .board-paint .board-sheet {
   fill: var(--paper-warm);
+  transition: fill 1600ms var(--ease-out);
+}
+
+/* Solved: the paper flushes with a little pink, as if the blossom's light fell on it. */
+.board.is-solved .board-sheet {
+  fill: color-mix(in oklab, var(--sakura-100) 75%, var(--paper-warm));
 }
 
 .board-paint .board-edge {

@@ -4,6 +4,7 @@ import type { CSSProperties } from 'react'
 import { BrushDivider } from '../components/BrushDivider'
 import { Footer } from '../components/Footer'
 import { Hero } from '../components/hero/Hero'
+import { HowToPlay } from '../components/HowToPlay'
 import { Seal } from '../components/hero/Seal'
 import { PaintedBoard } from '../components/PaintedBoard'
 import { Piece } from '../components/Piece'
@@ -52,6 +53,10 @@ export function Library({ size, go, solved, found }: Props) {
       />
 
       <div className="library-body">
+        <HowToPlay />
+
+        <BrushDivider />
+
         <SizePicker
           sizes={sizes}
           current={size}

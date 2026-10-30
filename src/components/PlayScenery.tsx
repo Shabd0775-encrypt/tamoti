@@ -21,3 +21,15 @@ export function PlayScenery() {
     </div>
   )
 }
+
+/**
+ * A see-through layer in front of everything, for the gust of petals that
+ * blows across when a board is solved. `gust` changes once per solve.
+ */
+export function SolveGust({ gust }: { gust: number }) {
+  return (
+    <div className="solve-gust" aria-hidden="true">
+      <Petals density={0} gust={gust} />
+    </div>
+  )
+}

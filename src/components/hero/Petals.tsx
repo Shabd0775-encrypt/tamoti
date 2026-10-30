@@ -22,6 +22,8 @@ type Petal = {
   color: string
   alpha: number
   age: number // seconds since it let go
+  /** Part of a gust: blown through once, then gone, rather than falling again. */
+  gust?: boolean
 }
 
 const COLORS = ['--sakura-300', '--sakura-300', '--sakura-500', '--sakura-100']
@@ -65,9 +67,34 @@ function drawPetal(ctx: CanvasRenderingContext2D, p: Petal, time: number) {
   ctx.restore()
 }
 
-/** `density` scales how many petals fall: 1 for the hero, less where the page should stay quiet. */
-export function Petals({ density = 1 }: { density?: number }) {
+/** A gust of petals that blows across from the left, faster than the drift, once. */
+function gustPetal(width: number, height: number, colors: string[]): Petal {
+  const p = makePetal(width, height, colors, false)
+  const r = Math.random
+  return {
+    ...p,
+    x: -40 - r() * width * 0.3,
+    y: height * (0.1 + r() * 0.6),
+    drift: 120 + r() * 120,
+    fall: 10 + r() * 30,
+    size: 9 + r() * 9,
+    gust: true,
+  }
+}
+
+type Props = {
+  /** How many petals fall: 1 for the hero, less where the page should stay quiet. */
+  density?: number
+  /** Change this number to send a gust of petals across (used when a board is solved). */
+  gust?: number
+}
+
+export function Petals({ density = 1, gust = 0 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  // The running animation, shared with the gust below: its petals, and a way to wake it.
+  const scene = useRef<{ petals: Petal[]; width: number; height: number; colors: string[]; start: () => void } | null>(
+    null,
+  )
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -81,6 +108,9 @@ export function Petals({ density = 1 }: { density?: number }) {
     let width = 0
     let height = 0
     let petals: Petal[] = []
+    const share = () => {
+      scene.current = { petals, width, height, colors, start }
+    }
 
     // Match the canvas bitmap to its size on screen, at the screen's pixel density, so petals stay crisp.
     const resize = () => {
@@ -92,6 +122,7 @@ export function Petals({ density = 1 }: { density?: number }) {
       ctx.setTransform(ratio, 0, 0, ratio, 0, 0)
       const count = Math.round((width < 640 ? 18 : 34) * density)
       petals = Array.from({ length: count }, () => makePetal(width, height, colors, true))
+      share()
     }
 
     let frame = 0
@@ -102,15 +133,19 @@ export function Petals({ density = 1 }: { density?: number }) {
       const dt = Math.min((now - last) / 1000, 0.05)
       last = now
       ctx.clearRect(0, 0, width, height)
-      for (const p of petals) {
+      for (let i = petals.length - 1; i >= 0; i--) {
+        const p = petals[i]
         p.y += p.fall * dt
         p.x += p.drift * dt
         p.angle += p.spin * dt
         p.age += dt
-        if (p.y > height + 30 || p.x > width + 60) Object.assign(p, makePetal(width, height, colors, false))
-        drawPetal(ctx, p, now / 1000)
+        const gone = p.y > height + 30 || p.x > width + 60
+        if (gone && p.gust) petals.splice(i, 1)
+        else if (gone) Object.assign(p, makePetal(width, height, colors, false))
+        else drawPetal(ctx, p, now / 1000)
       }
-      frame = requestAnimationFrame(tick)
+      // Nothing left to draw (a gust layer between gusts): rest until the next gust wakes it.
+      frame = petals.length > 0 ? requestAnimationFrame(tick) : 0
     }
 
     const start = () => {
@@ -131,6 +166,7 @@ export function Petals({ density = 1 }: { density?: number }) {
     const onVisibility = () => (document.hidden ? stop() : start())
 
     resize()
+    share()
     observer.observe(canvas)
     window.addEventListener('resize', resize)
     document.addEventListener('visibilitychange', onVisibility)
@@ -141,8 +177,17 @@ export function Petals({ density = 1 }: { density?: number }) {
       observer.disconnect()
       window.removeEventListener('resize', resize)
       document.removeEventListener('visibilitychange', onVisibility)
+      scene.current = null
     }
   }, [density])
+
+  // A gust: a couple of dozen petals blown across from the left, once.
+  useEffect(() => {
+    const s = scene.current
+    if (!gust || !s) return
+    for (let i = 0; i < 26; i++) s.petals.push(gustPetal(s.width, s.height, s.colors))
+    s.start()
+  }, [gust])
 
   return <canvas className="petals" ref={canvasRef} aria-hidden="true" />
 }
