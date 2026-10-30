@@ -65,6 +65,13 @@ button {
   cursor: pointer;
 }
 
+/* The invisible <svg> that holds the watercolor filters. */
+.wash-filters {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
 /* Anything sitting on a board is placed with four numbers: row, column, width, height. */
 .on-board {
   position: absolute;
@@ -81,46 +88,6 @@ button {
   max-width: 960px;
   margin: 0 auto;
   padding: 24px 16px 80px;
-}
-
-.size-picker {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 6px;
-  margin-bottom: 40px;
-}
-
-.size-picker button {
-  display: grid;
-  gap: 2px;
-  padding: 12px 8px;
-  border: 1px solid var(--rule);
-  border-radius: var(--board-radius);
-  background: transparent;
-  text-align: center;
-  transition: background-color 160ms var(--ease-out);
-}
-
-.size-picker button:hover {
-  background: var(--board);
-}
-
-.size-picker button[aria-pressed='true'] {
-  background: var(--ink-900);
-  border-color: var(--ink-900);
-  color: var(--paper);
-}
-
-.size-name {
-  font-size: 1.125rem;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-
-.size-meta {
-  font-size: 0.8125rem;
-  opacity: 0.8;
-  font-variant-numeric: tabular-nums;
 }
 
 .piece-set {
@@ -249,9 +216,6 @@ button {
 }
 
 @media (max-width: 560px) {
-  .size-picker {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
 
   .puzzle-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -389,8 +353,37 @@ button {
   background: var(--ghost-fits);
 }
 
-.ghost.is-blocked::before {
-  background: var(--ghost-blocked);
+.ghost.is-overlapping::before {
+  background: var(--overlap);
+}
+
+/*
+  Overlaps are allowed while playing. Pieces that overlap go a little
+  see-through, so you can see what's underneath, and each doubled-up square
+  is speckled with ink dots, which show on any piece's color (and aren't
+  mistaken for the striped blocked squares). Nothing flashes or scolds.
+*/
+.piece.is-overlapping .piece-body {
+  opacity: 0.62;
+}
+
+.clash {
+  padding: calc(var(--piece-gap) + 3px);
+  pointer-events: none;
+}
+
+.clash::before {
+  content: '';
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: radial-gradient(circle, var(--overlap-dot) 1.6px, transparent 2px) 0 0 / 9px 9px;
+}
+
+/* While a piece is being dragged, extra fingers turn it rather than scrolling or zooming the page. */
+html.is-dragging,
+html.is-dragging body {
+  touch-action: none;
 }
 
 /* ---------- Pieces ---------- */
@@ -480,6 +473,13 @@ button {
 /* Keyboard tips only make sense where there's a mouse (and so likely a keyboard). */
 @media (hover: none) {
   .keyboard-tip {
+    display: none;
+  }
+}
+
+/* …and the second-finger tip only where there's a touch screen. */
+@media (hover: hover) {
+  .touch-tip {
     display: none;
   }
 }

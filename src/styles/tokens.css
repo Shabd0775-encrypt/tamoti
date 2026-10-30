@@ -62,9 +62,10 @@
   --tone-4: var(--ink-300);
   --piece-edge: color-mix(in oklab, var(--ink-900) 16%, transparent);
 
-  /* Where a dragged piece would land */
+  /* Where a dragged piece would land, and where pieces overlap (allowed while playing, marked softly) */
   --ghost-fits: color-mix(in oklab, var(--mist-teal) 60%, transparent);
-  --ghost-blocked: color-mix(in oklab, var(--sakura-500) 40%, transparent);
+  --overlap: color-mix(in oklab, var(--sakura-300) 55%, transparent);
+  --overlap-dot: color-mix(in oklab, var(--ink-900) 45%, transparent);
 
   /* Shape and depth */
   --piece-gap: 3px;

@@ -1,0 +1,188 @@
+/* The library below the hero, section by section. */
+
+/* ---------- Choose a board ---------- */
+
+.size-picker {
+  display: grid;
+  gap: 56px;
+  padding: 72px 0 112px;
+}
+
+/* The heading and its sentence share a line; the six boards get the full width below. */
+.size-picker-intro {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px 48px;
+}
+
+.size-picker h2 {
+  margin: 0;
+  color: var(--ink-900);
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3.2vw, 2.75rem);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: 0.04em;
+}
+
+.size-picker-intro p {
+  max-width: 34ch;
+  margin: 0;
+  color: var(--ink-700);
+}
+
+.size-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.size-options button {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 12px 8px 4px;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  color: var(--ink-700);
+}
+
+/* Each board is drawn a little bigger than the one before: 5×5 is 44px, 10×10 is 104px. */
+.size-art {
+  --art: calc(44px + (var(--n) - 5) * 12px);
+
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--art);
+  height: var(--art);
+  margin-bottom: 22px;
+}
+
+.size-grid {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  transition: transform 600ms var(--ease-out);
+}
+
+.size-grid-paper {
+  fill: var(--paper-warm);
+}
+
+.size-grid-lines {
+  fill: none;
+  stroke: var(--ink-300);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.size-grid-frame {
+  fill: none;
+  stroke: var(--ink-700);
+  stroke-width: 1.6;
+  vector-effect: non-scaling-stroke;
+}
+
+/* The wash sits behind the board, hidden until that size is chosen. */
+.size-wash {
+  position: absolute;
+  inset: -36%;
+  width: 172%;
+  height: 172%;
+  opacity: 0;
+  transform: scale(0.85);
+  transition:
+    opacity 700ms var(--ease-out),
+    transform 900ms var(--ease-out);
+  pointer-events: none;
+}
+
+.size-wash-pale {
+  fill: var(--sakura-300);
+  opacity: 0.55;
+}
+
+.size-wash-deep {
+  fill: var(--sakura-500);
+  opacity: 0.22;
+}
+
+.size-grid {
+  position: relative;
+}
+
+.size-name {
+  color: inherit;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  line-height: 1.3;
+  font-variant-numeric: tabular-nums;
+}
+
+.size-meta {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+}
+
+.size-options button:hover .size-grid {
+  transform: translateY(-3px);
+}
+
+.size-options button:hover .size-wash {
+  opacity: 0.45;
+  transform: scale(0.92);
+}
+
+.size-options button[aria-pressed='true'] {
+  color: var(--ink-900);
+}
+
+.size-options button[aria-pressed='true'] .size-wash {
+  opacity: 1;
+  transform: none;
+}
+
+.size-options button[aria-pressed='true'] .size-grid-frame {
+  stroke: var(--ink-900);
+}
+
+@media (max-width: 720px) {
+  .size-picker {
+    gap: 28px;
+    padding: 48px 0 80px;
+  }
+
+  /* Three across, two rows: there isn't room for six circles side by side. */
+  .size-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    align-items: end;
+    gap: 20px 8px;
+  }
+
+  .size-art {
+    --art: calc(34px + (var(--n) - 5) * 8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .size-grid,
+  .size-wash {
+    transition: opacity 200ms;
+  }
+
+  .size-options button:hover .size-grid,
+  .size-options button:hover .size-wash,
+  .size-options button[aria-pressed='true'] .size-wash {
+    transform: none;
+  }
+}

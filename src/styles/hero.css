@@ -24,12 +24,6 @@
   background: linear-gradient(to bottom, color-mix(in oklab, var(--glow-100) 85%, var(--sakura-100)) 0%, var(--paper) 64%);
 }
 
-.wash-filters {
-  position: absolute;
-  width: 0;
-  height: 0;
-}
-
 /* Alpine glow in the air: a warm blush behind the peak, as if the sun is just below the horizon. */
 .hero-glow {
   position: absolute;

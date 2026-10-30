@@ -38,7 +38,8 @@ export function useRoute(): [Route, Go] {
   const go: Go = (next) => {
     window.history.pushState(null, '', toAddress(next))
     setRoute(next)
-    window.scrollTo(0, 0)
+    // A new screen starts at the top; changing the size within the library keeps your place.
+    if (next.screen !== route.screen) window.scrollTo(0, 0)
   }
 
   return [route, go]

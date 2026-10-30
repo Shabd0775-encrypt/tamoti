@@ -3,6 +3,9 @@
 // Pointer Events cover all three with one API: pointerdown when you press,
 // pointermove while you move, pointerup when you let go. A press that barely
 // moves counts as a tap, and tapping a piece turns it sideways.
+//
+// To turn a piece while dragging it: press R, right-click, or (on a touch
+// screen) tap anywhere with a second finger.
 
 import { useEffect, useState, type Dispatch, type PointerEvent, type RefObject } from 'react'
 import { canPlace, footprint } from '../game/board'
@@ -14,6 +17,8 @@ const DRAG_THRESHOLD = 6
 
 export type Drag = {
   pieceId: string
+  /** Which pointer (mouse, or one particular finger) is doing the dragging. */
+  pointerId: number
   from: 'tray' | 'board'
   rotated: boolean
   /** Where on the piece the pointer holds it, from 0 to 1 across and down. */
@@ -25,6 +30,7 @@ export type Drag = {
   board: { left: number; top: number; width: number }
 }
 
+/** Where the piece would land. `fits` is true for a clean fit; false means it would overlap something. */
 export type DropTarget = Placement & { fits: boolean }
 
 export function useDrag(state: GameState, dispatch: Dispatch<GameAction>, boardRef: RefObject<HTMLDivElement | null>) {
@@ -62,11 +68,13 @@ export function useDrag(state: GameState, dispatch: Dispatch<GameAction>, boardR
 
   function startDrag(event: PointerEvent<HTMLElement>, pieceId: string) {
     if (event.button !== 0) return // only the main mouse button, or a finger
+    if (drag) return // a second finger on another piece turns the dragged one instead (see onDown)
     event.preventDefault()
     const box = event.currentTarget.getBoundingClientRect()
     const placed = state.placements[pieceId]
     setDrag({
       pieceId,
+      pointerId: event.pointerId,
       from: placed ? 'board' : 'tray',
       rotated: placed?.rotated ?? state.trayRotated[pieceId] ?? false,
       grab: { x: (event.clientX - box.left) / box.width, y: (event.clientY - box.top) / box.height },
@@ -81,12 +89,15 @@ export function useDrag(state: GameState, dispatch: Dispatch<GameAction>, boardR
   // following even when the pointer leaves the piece itself.
   useEffect(() => {
     if (!drag) return
+    // While dragging, a second finger shouldn't scroll or zoom the page.
+    document.documentElement.classList.add('is-dragging')
 
     const turn = () =>
       // Turning keeps the same spot under the pointer: what was down becomes across.
       setDrag((d) => d && { ...d, rotated: !d.rotated, grab: { x: 1 - d.grab.y, y: d.grab.x } })
 
     const onMove = (e: globalThis.PointerEvent) => {
+      if (e.pointerId !== drag.pointerId) return
       const board = measureBoard() // re-measured in case the page scrolled
       setDrag((d) => {
         if (!d) return d
@@ -95,19 +106,27 @@ export function useDrag(state: GameState, dispatch: Dispatch<GameAction>, boardR
       })
     }
 
-    const onUp = () => {
+    // A second finger touching down while the first one drags: turn the piece.
+    const onDown = (e: globalThis.PointerEvent) => {
+      if (e.pointerId === drag.pointerId) return
+      e.preventDefault()
+      turn()
+    }
+
+    const onUp = (e: globalThis.PointerEvent) => {
+      if (e.pointerId !== drag.pointerId) return
       setDrag(null)
       if (!drag.moved) {
         dispatch({ type: 'rotate', pieceId: drag.pieceId })
         return
       }
       const target = dropTarget(drag)
-      if (target?.fits) {
+      if (target) {
+        // Over the board it always goes down, even on top of other pieces.
         dispatch({ type: 'place', pieceId: drag.pieceId, at: target })
-      } else if (!target && drag.from === 'board') {
+      } else if (drag.from === 'board') {
         dispatch({ type: 'remove', pieceId: drag.pieceId }) // dropped off the board: back to the tray
       }
-      // Anything else (a spot where it doesn't fit) leaves the piece where it was.
     }
 
     const onKey = (e: KeyboardEvent) => {
@@ -120,14 +139,19 @@ export function useDrag(state: GameState, dispatch: Dispatch<GameAction>, boardR
       turn()
     }
 
-    const cancel = () => setDrag(null)
+    const cancel = (e: globalThis.PointerEvent) => {
+      if (e.pointerId === drag.pointerId) setDrag(null)
+    }
 
+    window.addEventListener('pointerdown', onDown)
     window.addEventListener('pointermove', onMove)
     window.addEventListener('pointerup', onUp)
     window.addEventListener('pointercancel', cancel)
     window.addEventListener('keydown', onKey)
     window.addEventListener('contextmenu', onContextMenu)
     return () => {
+      document.documentElement.classList.remove('is-dragging')
+      window.removeEventListener('pointerdown', onDown)
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointerup', onUp)
       window.removeEventListener('pointercancel', cancel)

@@ -5,7 +5,7 @@
 // `useReducer`. Keeping every change here means the screen code only ever
 // says what happened, never how to update things.
 
-import { canPlace, footprint, place, remove } from '../game/board'
+import { footprint, onBoard, place, remove, turnInPlace } from '../game/board'
 import type { Placement, Placements, Puzzle } from '../game/types'
 
 export type GameState = {
@@ -37,7 +37,8 @@ function commit(state: GameState, placements: Placements): GameState {
 export function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
     case 'place': {
-      if (!canPlace(state.puzzle, state.placements, action.pieceId, action.at)) return state
+      // Anywhere on the board is allowed, overlaps included: the player is free to try things.
+      if (!onBoard(state.puzzle, action.pieceId, action.at)) return state
       const trayRotated = { ...state.trayRotated, [action.pieceId]: action.at.rotated }
       return { ...commit(state, place(state.placements, action.pieceId, action.at)), trayRotated }
     }
@@ -52,9 +53,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         const trayRotated = { ...state.trayRotated, [action.pieceId]: !state.trayRotated[action.pieceId] }
         return { ...state, trayRotated }
       }
-      // On the board, turn the piece about its top-left corner, and only if it still fits.
-      const turned = { ...placed, rotated: !placed.rotated }
-      if (!canPlace(state.puzzle, state.placements, action.pieceId, turned)) return state
+      // On the board, the piece always turns, about its own centre.
+      const turned = turnInPlace(state.puzzle, action.pieceId, placed)
       return commit(state, place(state.placements, action.pieceId, turned))
     }
 

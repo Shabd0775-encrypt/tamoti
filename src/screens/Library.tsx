@@ -5,6 +5,7 @@ import { Hero } from '../components/hero/Hero'
 import { Icon } from '../components/Icon'
 import { MiniBoard } from '../components/MiniBoard'
 import { Piece } from '../components/Piece'
+import { SizePicker } from '../components/SizePicker'
 import { toneFor } from '../components/tone'
 import { library, puzzleId, sizes, tierNames, type Tier } from '../game/library'
 import type { Go } from '../state/route'
@@ -37,26 +38,20 @@ export function Library({ size, go, solved }: Props) {
       />
 
       <div className="library-body">
-        <nav className="size-picker" id="boards" aria-label="Board size">
-          {sizes.map((s) => {
-            const done = library.sizes[s].puzzles.filter((p) => solved.has(puzzleId(s, p.number))).length
-            return (
-              <button
-                key={s}
-                type="button"
-                aria-pressed={s === size}
-                onClick={() => go({ screen: 'library', size: s })}
-              >
-                <span className="size-name">
-                  {s}×{s}
-                </span>
-                <span className="size-meta">
-                  {done}/{library.sizes[s].puzzles.length}
-                </span>
-              </button>
-            )
-          })}
-        </nav>
+        <SizePicker
+          sizes={sizes}
+          current={size}
+          progress={Object.fromEntries(
+            sizes.map((s) => [
+              s,
+              {
+                done: library.sizes[s].puzzles.filter((p) => solved.has(puzzleId(s, p.number))).length,
+                total: library.sizes[s].puzzles.length,
+              },
+            ]),
+          )}
+          onChoose={(s) => go({ screen: 'library', size: s })}
+        />
 
         <section className="piece-set" aria-labelledby="piece-set-title" style={{ '--size': size } as CSSProperties}>
           <h2 id="piece-set-title">

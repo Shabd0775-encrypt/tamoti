@@ -1,5 +1,5 @@
 import type { CSSProperties, PointerEvent, Ref } from 'react'
-import { footprint } from '../game/board'
+import { clashes, footprint } from '../game/board'
 import type { GameState } from '../state/gameReducer'
 import type { DropTarget } from '../state/useDrag'
 import { Piece } from './Piece'
@@ -22,6 +22,7 @@ export function Board({ ref, state, liftedId, target, onPiecePointerDown, onRota
   const { puzzle, placements } = state
   const dragged = puzzle.pieces.find((p) => p.id === liftedId)
   const ghost = target && dragged && { ...target, ...footprint(dragged, target.rotated) }
+  const clash = clashes(puzzle, placements)
 
   return (
     <div className="board">
@@ -36,27 +37,42 @@ export function Board({ ref, state, liftedId, target, onPiecePointerDown, onRota
           <div key={i} className="blocked on-board" style={spot(rect.row, rect.col, rect.w, rect.h)} />
         ))}
 
-        {puzzle.pieces.map((piece, index) => {
-          const at = placements[piece.id]
-          if (!at) return null
-          const { w, h } = footprint(piece, at.rotated)
+        {/* In the order they were put down, so the piece moved last sits on top. */}
+        {Object.entries(placements).map(([pieceId, at]) => {
+          const index = puzzle.pieces.findIndex((p) => p.id === pieceId)
+          const { w, h } = footprint(puzzle.pieces[index], at.rotated)
+          const classes = [
+            'on-board',
+            pieceId === liftedId && 'is-lifted',
+            clash.pieces.has(pieceId) && 'is-overlapping',
+          ]
           return (
             <Piece
-              key={piece.id}
+              key={pieceId}
               w={w}
               h={h}
               tone={toneFor(index)}
-              className={`on-board ${piece.id === liftedId ? 'is-lifted' : ''}`}
+              className={classes.filter(Boolean).join(' ')}
               style={spot(at.row, at.col, w, h)}
-              onPointerDown={(event) => onPiecePointerDown(event, piece.id)}
-              onContextMenu={() => onRotate(piece.id)}
+              onPointerDown={(event) => onPiecePointerDown(event, pieceId)}
+              onContextMenu={() => onRotate(pieceId)}
             />
           )
         })}
 
+        {/* Squares covered twice (or a piece on a blocked square), marked softly. */}
+        {clash.cells.map((cell) => (
+          <div
+            key={`${cell.row},${cell.col}`}
+            className="clash on-board"
+            style={spot(cell.row, cell.col, 1, 1)}
+            aria-hidden="true"
+          />
+        ))}
+
         {ghost && (
           <div
-            className={`ghost on-board ${ghost.fits ? '' : 'is-blocked'}`}
+            className={`ghost on-board ${ghost.fits ? '' : 'is-overlapping'}`}
             style={spot(ghost.row, ghost.col, ghost.w, ghost.h)}
           />
         )}

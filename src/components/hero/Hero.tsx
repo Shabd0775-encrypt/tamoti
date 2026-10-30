@@ -12,7 +12,6 @@ import { BoardPreview } from './BoardPreview'
 import { Petals } from './Petals'
 import { Seal } from './Seal'
 import { Tree } from './Tree'
-import { WashFilters } from './WashFilters'
 
 type Props = {
   size: number
@@ -62,7 +61,6 @@ export function Hero({ size, next, onBegin }: Props) {
 
   return (
     <section className="hero" ref={root} aria-labelledby="hero-title">
-      <WashFilters />
       <div className="hero-glow" aria-hidden="true" />
       <div className="mountains" aria-hidden="true">
         <Backdrop />

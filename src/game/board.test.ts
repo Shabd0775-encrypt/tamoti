@@ -2,7 +2,7 @@
 // Run them with `npm test`.
 
 import { describe, expect, it } from 'vitest'
-import { canPlace, isSolved, occupancy, place, remove } from './board'
+import { canPlace, clashes, isSolved, occupancy, onBoard, place, remove, turnInPlace } from './board'
 import type { Placements, Puzzle } from './types'
 
 // A hand-made 5×5 puzzle. "#" is blocked, "." is empty:
@@ -82,6 +82,57 @@ describe('place and remove', () => {
     expect(occupancy(puzzle, placed)[4][2]).toBe('F')
     expect(occupancy(puzzle, remove(placed, 'F'))[4][2]).toBe(null)
   })
+  it('puts the piece moved last on top of the pile', () => {
+    let placements = place({}, 'A', { row: 0, col: 0, rotated: false })
+    placements = place(placements, 'B', { row: 1, col: 1, rotated: false })
+    placements = place(placements, 'A', { row: 0, col: 0, rotated: false }) // touched again
+    expect(Object.keys(placements)).toEqual(['B', 'A'])
+    expect(occupancy(puzzle, placements)[1][1]).toBe('A') // A is on top where they overlap
+  })
+})
+
+describe('onBoard', () => {
+  it('allows any spot fully on the board, even over other pieces or blocked squares', () => {
+    expect(onBoard(puzzle, 'E', { row: 2, col: 2, rotated: false })).toBe(true) // on a blocked square
+    expect(onBoard(puzzle, 'C', { row: 2, col: 0, rotated: false })).toBe(false) // hangs off the bottom
+  })
+})
+
+describe('clashes', () => {
+  it('finds nothing when pieces sit side by side', () => {
+    expect(clashes(puzzle, solution).cells).toEqual([])
+  })
+
+  it('finds the squares two pieces share, and both pieces', () => {
+    // A covers the top-left 2×2; B, one step to the right, shares A's right-hand column.
+    let placements = place({}, 'A', { row: 0, col: 0, rotated: false })
+    placements = place(placements, 'B', { row: 0, col: 1, rotated: false })
+    const { cells, pieces } = clashes(puzzle, placements)
+    expect(cells).toEqual([
+      { row: 0, col: 1, w: 1, h: 1 },
+      { row: 1, col: 1, w: 1, h: 1 },
+    ])
+    expect([...pieces].sort()).toEqual(['A', 'B'])
+  })
+
+  it('counts a piece lying on a blocked square', () => {
+    const { cells, pieces } = clashes(puzzle, place({}, 'E', { row: 2, col: 2, rotated: false }))
+    expect(cells).toHaveLength(2) // E is 1 by 2, and both its squares are blocked
+    expect([...pieces]).toEqual(['E'])
+  })
+})
+
+describe('turnInPlace', () => {
+  it('turns a piece about its centre', () => {
+    // C stands 1 wide and 4 tall in the last column. Lying down it is 4 wide,
+    // centred where it stood, then nudged left so it stays on the board.
+    expect(turnInPlace(puzzle, 'C', { row: 1, col: 4, rotated: false })).toEqual({ row: 3, col: 1, rotated: true })
+  })
+
+  it('turns back to where it started', () => {
+    const start = { row: 1, col: 1, rotated: false }
+    expect(turnInPlace(puzzle, 'A', turnInPlace(puzzle, 'A', start))).toEqual(start) // a square stays put
+  })
 })
 
 describe('isSolved', () => {
@@ -92,5 +143,11 @@ describe('isSolved', () => {
 
   it('is true once every empty cell is covered', () => {
     expect(isSolved(puzzle, solution)).toBe(true)
+  })
+
+  it('is false while a piece lies on a blocked square, even if every open cell is covered', () => {
+    // Swap E's spot for one on the blocked squares: its own cells go empty, so slide F over them too.
+    const placements = place(solution, 'E', { row: 2, col: 2, rotated: false })
+    expect(isSolved(puzzle, placements)).toBe(false)
   })
 })

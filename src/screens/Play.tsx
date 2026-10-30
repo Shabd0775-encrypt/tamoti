@@ -6,7 +6,7 @@ import { Icon } from '../components/Icon'
 import { Piece } from '../components/Piece'
 import { toneFor } from '../components/tone'
 import { Tray } from '../components/Tray'
-import { footprint, isSolved } from '../game/board'
+import { clashes, footprint, isSolved } from '../game/board'
 import { findPuzzle, library, puzzleId, tierNames } from '../game/library'
 import { gameReducer, newGame } from '../state/gameReducer'
 import type { Go } from '../state/route'
@@ -34,6 +34,7 @@ export function Play({ id, go, onSolved }: Props) {
   const { puzzle } = state
   const solved = isSolved(puzzle, state.placements)
   const piecesLeft = puzzle.pieces.length - Object.keys(state.placements).length
+  const overlapping = clashes(puzzle, state.placements).pieces.size > 0
   const nextId = nextPuzzleId(entry.size, entry.number)
 
   useEffect(() => {
@@ -81,13 +82,19 @@ export function Play({ id, go, onSolved }: Props) {
                   ? 'This board has only one solution, and you found it.'
                   : `This board can be filled ${entry.solutions} different ways. You found one of them.`}
               </>
+            ) : overlapping && piecesLeft === 0 ? (
+              <>
+                <strong>Some pieces overlap</strong>
+                That's fine while you try things. Slide them apart to finish.
+              </>
             ) : (
               <>
                 <strong>
                   {piecesLeft} {piecesLeft === 1 ? 'piece' : 'pieces'} to place
                 </strong>
-                Drag a piece onto the board. Tap a piece to turn it
-                <span className="keyboard-tip">, or press R while dragging</span>.
+                Drag a piece onto the board; pieces can overlap while you try things. Tap a piece to turn it
+                <span className="keyboard-tip">, or press R while dragging</span>
+                <span className="touch-tip">, or tap with a second finger while dragging</span>.
               </>
             )}
           </p>
@@ -103,7 +110,11 @@ export function Play({ id, go, onSolved }: Props) {
                 Undo
               </button>
             )}
-            <button type="button" onClick={() => dispatch({ type: 'reset' })} disabled={piecesLeft === puzzle.pieces.length}>
+            <button
+              type="button"
+              onClick={() => dispatch({ type: 'reset' })}
+              disabled={piecesLeft === puzzle.pieces.length}
+            >
               Start over
             </button>
           </div>
