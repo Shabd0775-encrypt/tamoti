@@ -105,63 +105,6 @@ export function WashFilters() {
           <feComposite in="blots" in2="soft" operator="arithmetic" k2="1.6" k3="-0.6" />
         </filter>
 
-        {/* Splattered flecks: small, hard, jagged, the way pigment lands when the brush is flicked. */}
-        <filter id="fleck" x="-50%" y="-50%" width="200%" height="200%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.2" numOctaves="2" seed="29" result="warp" />
-          <feDisplacementMap in="SourceGraphic" in2="warp" scale="7" xChannelSelector="R" yChannelSelector="G" />
-        </filter>
-
-        {/*
-          Sponge texture: the shape's edge is pushed about, then it is punched
-          full of small holes wherever a second noise is strong, the way paint
-          dabbed with a sponge leaves paper showing through.
-        */}
-        <filter id="sponge-coarse" x="-25%" y="-25%" width="150%" height="150%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.025" numOctaves="3" seed="31" result="warp" />
-          <feDisplacementMap
-            in="SourceGraphic"
-            in2="warp"
-            scale="46"
-            xChannelSelector="R"
-            yChannelSelector="G"
-            result="shape"
-          />
-          <feTurbulence type="fractalNoise" baseFrequency="0.07" numOctaves="3" seed="33" result="pores" />
-          <feColorMatrix
-            in="pores"
-            type="matrix"
-            values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -3 0 0 0 2.1"
-            result="poreMask"
-          />
-          <feComposite in="shape" in2="poreMask" operator="in" />
-        </filter>
-        <filter id="sponge-fine" x="-25%" y="-25%" width="150%" height="150%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" seed="35" result="warp" />
-          <feDisplacementMap
-            in="SourceGraphic"
-            in2="warp"
-            scale="30"
-            xChannelSelector="R"
-            yChannelSelector="G"
-            result="shape"
-          />
-          <feTurbulence type="fractalNoise" baseFrequency="0.14" numOctaves="2" seed="37" result="pores" />
-          <feColorMatrix
-            in="pores"
-            type="matrix"
-            values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -3.4 0 0 0 2.2"
-            result="poreMask"
-          />
-          <feComposite in="shape" in2="poreMask" operator="in" />
-        </filter>
-
-        {/* A soft cloud of color with no edge at all, for the misty tree. */}
-        <filter id="mist-blur" x="-40%" y="-40%" width="180%" height="180%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="3" seed="39" result="warp" />
-          <feDisplacementMap in="SourceGraphic" in2="warp" scale="40" xChannelSelector="R" yChannelSelector="G" />
-          <feGaussianBlur stdDeviation="18" />
-        </filter>
-
         {/* The edge of a big sheet, like the play board: a slow, gentle wobble rather than a ragged one. */}
         <filter id="sheet-edge" x="-2%" y="-2%" width="104%" height="104%">
           <feTurbulence type="fractalNoise" baseFrequency="0.006" numOctaves="2" seed="43" result="warp" />

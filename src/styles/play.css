@@ -352,109 +352,6 @@ html.is-dragging body {
     inset 0 0 14px color-mix(in oklab, var(--tone) 50%, color-mix(in oklab, var(--ink-700) 40%, transparent));
 }
 
-/*
-  Texture over the color, being chosen (see LookSwitcher.tsx): html[data-texture]
-  picks one. Most are a small tile of SVG noise laid over the piece and
-  multiplied into its color, the way paper texture shows through paint;
-  a few (polished, silk, paper) also change how light catches the edge.
-*/
-.piece-body {
-  position: relative;
-  overflow: hidden;
-}
-
-.piece-body::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  mix-blend-mode: multiply;
-  pointer-events: none;
-}
-
-/* Polished: lacquer or glazed ceramic. A soft diagonal sheen, a bright top edge, a deeper base. */
-[data-texture='polished'] .piece-body {
-  background:
-    linear-gradient(to bottom, transparent 55%, color-mix(in oklab, var(--tone) 70%, var(--ink-700) 30%)),
-    var(--tone);
-  box-shadow:
-    inset 0 1.5px 0 color-mix(in oklab, white 70%, transparent),
-    inset 0 0 0 1px color-mix(in oklab, var(--tone) 55%, var(--ink-700)),
-    inset 0 -6px 10px -4px color-mix(in oklab, var(--ink-900) 22%, transparent);
-}
-
-[data-texture='polished'] .piece-body::after {
-  background: linear-gradient(118deg, color-mix(in oklab, white 55%, transparent) 0%, transparent 34%, transparent 72%, color-mix(in oklab, white 18%, transparent) 100%);
-  mix-blend-mode: screen;
-}
-
-/* Paper: matte cut paper. A fine grain, a few pale fibers, a lighter cut edge. */
-[data-texture='paper'] .piece-body {
-  background: var(--tone);
-  box-shadow:
-    inset 0 0 0 1.5px color-mix(in oklab, white 45%, transparent),
-    inset 0 0 0 2.5px color-mix(in oklab, var(--tone) 70%, var(--ink-700));
-}
-
-[data-texture='paper'] .piece-body::after {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.06 .5' numOctaves='1' seed='15' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 2.6 -1.6'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23f)'/%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' seed='13' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2  0 0 0 0 .17  0 0 0 0 .16  0 0 0 .4 -.1'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23f)'/%3E%3C/svg%3E");
-  mix-blend-mode: normal;
-  opacity: 0.8;
-}
-
-/* Silk: a fine woven crosshatch with a gentle sheen. */
-[data-texture='silk'] .piece-body::after {
-  background:
-    linear-gradient(105deg, transparent 20%, color-mix(in oklab, white 30%, transparent) 45%, transparent 70%),
-    repeating-linear-gradient(45deg, color-mix(in oklab, var(--ink-900) 9%, transparent) 0 1px, transparent 1px 3px),
-    repeating-linear-gradient(-45deg, color-mix(in oklab, var(--ink-900) 7%, transparent) 0 1px, transparent 1px 3px);
-  mix-blend-mode: normal;
-}
-
-/* Crackle: the fine crazing in a raku glaze. */
-[data-texture='crackle'] .piece-body::after {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='turbulence' baseFrequency='.032' numOctaves='2' seed='17' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2  0 0 0 0 .17  0 0 0 0 .16  -22 0 0 0 1.35'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23f)'/%3E%3C/svg%3E");
-  opacity: 0.4;
-}
-
-/* Wood: the soft grain of pale hinoki. */
-[data-texture='wood'] .piece-body::after {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='turbulence' baseFrequency='.004 .07' numOctaves='2' seed='19' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2  0 0 0 0 .17  0 0 0 0 .16  -2.4 0 0 0 1.0'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23f)'/%3E%3C/svg%3E");
-  background-size: 300px 300px;
-  opacity: 0.35;
-}
-
-/* Stone: mottled, like an ink stone, with a fine grain. */
-[data-texture='stone'] .piece-body::after {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.035' numOctaves='4' seed='21' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2  0 0 0 0 .17  0 0 0 0 .16  0 0 0 1.2 -.45'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23f)'/%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='23' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2  0 0 0 0 .17  0 0 0 0 .16  0 0 0 .4 -.1'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23f)'/%3E%3C/svg%3E");
-  opacity: 0.6;
-}
-
-/* Washi: pale paper fibers running through the color, over a fine grain. */
-[data-texture='washi'] .piece-body::after {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.35 .015' numOctaves='2' seed='5' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 2.2 -1.1'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23f)'/%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='9' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2  0 0 0 0 .17  0 0 0 0 .16  0 0 0 .35 -.08'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23f)'/%3E%3C/svg%3E");
-  mix-blend-mode: normal;
-  opacity: 0.75;
-}
-
-/* Grain: cold-press watercolor paper. */
-html:not([data-texture]) .piece-body::after,
-[data-texture='grain'] .piece-body::after {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2  0 0 0 0 .17  0 0 0 0 .16  0 0 0 .55 -.12'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23f)'/%3E%3C/svg%3E");
-}
-
-/* Brush: the faint streaks of one wide stroke laid across the tile. */
-[data-texture='brush'] .piece-body::after {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.006 .5' numOctaves='2' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2  0 0 0 0 .17  0 0 0 0 .16  0 0 0 .9 -.3'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23f)'/%3E%3C/svg%3E");
-  opacity: 0.8;
-}
-
-/* Granulation: pigment that settled into tiny specks as it dried. */
-[data-texture='granulation'] .piece-body::after {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.42' numOctaves='2' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2  0 0 0 0 .17  0 0 0 0 .16  0 0 0 3.2 -1.75'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23f)'/%3E%3C/svg%3E");
-  opacity: 0.7;
-}
-
 .piece[data-tone='1'] {
   --tone: var(--tone-1);
 }
@@ -695,14 +592,14 @@ html:not([data-texture]) .piece-body::after,
   }
 }
 
-/* TEMPORARY: the texture switcher. Delete with LookSwitcher.tsx. */
-.look-switcher {
+/* TEMPORARY: the placing-sound sampler. Delete with SoundSampler.tsx. */
+.sound-sampler {
   position: fixed;
   left: 50%;
   bottom: 16px;
   z-index: 20;
   display: grid;
-  gap: 4px;
+  gap: 2px;
   max-width: calc(100% - 24px);
   padding: 8px 10px;
   border-radius: 14px;
@@ -711,20 +608,20 @@ html:not([data-texture]) .piece-body::after,
   translate: -50% 0;
 }
 
-.look-switcher [role='group'] {
+.sound-sampler [role='group'] {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 2px;
 }
 
-.look-label {
-  width: 64px;
+.sampler-label {
+  margin-right: 6px;
   color: var(--ink-700);
   font-size: 0.8125rem;
 }
 
-.look-switcher button {
+.sound-sampler button {
   padding: 3px 10px;
   border: 0;
   border-radius: 999px;
@@ -734,7 +631,13 @@ html:not([data-texture]) .piece-body::after,
   line-height: 1.6;
 }
 
-.look-switcher button[aria-pressed='true'] {
+.sound-sampler button[aria-pressed='true'] {
   background: var(--ink-900);
   color: var(--paper);
+}
+
+.sampler-note {
+  margin: 2px 0 0;
+  color: var(--ink-700);
+  font-size: 0.75rem;
 }

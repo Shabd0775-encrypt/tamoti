@@ -4,11 +4,11 @@ import { useEffect, useReducer, useRef, useState, type CSSProperties, type Dispa
 import { Board } from '../components/Board'
 import { BrushButton } from '../components/BrushButton'
 import { Icon } from '../components/Icon'
-import { LookSwitcher } from '../components/LookSwitcher'
 import { Piece } from '../components/Piece'
 import { PlayScenery, SolveGust } from '../components/PlayScenery'
 import { SolutionThumb } from '../components/SolutionThumb'
 import { toneFor } from '../components/tone'
+import { SoundSampler } from '../components/SoundSampler'
 import { Tray } from '../components/Tray'
 import { canPlace, clashes, footprint, isSolved, onBoard, turnInPlace } from '../game/board'
 import { dailyPuzzleId } from '../game/daily'
@@ -45,7 +45,10 @@ export function Play({ id, go, found, onSolved }: Props) {
   const dispatch: Dispatch<GameAction> = (action) => {
     rawDispatch(action)
     if (!soundOn) return
-    if (action.type === 'place') play('place')
+    if (action.type === 'place') {
+      const piece = puzzle.pieces.find((p) => p.id === action.pieceId)
+      play('place', piece ? piece.w * piece.h : undefined)
+    }
     if (action.type === 'rotate') play('turn')
   }
   const boardRef = useRef<HTMLDivElement>(null)
@@ -269,9 +272,7 @@ export function Play({ id, go, found, onSolved }: Props) {
                   {piecesLeft} {piecesLeft === 1 ? 'piece' : 'pieces'} to place
                 </strong>
                 Drag a piece onto the board; pieces can overlap while you try things. Tap a piece to turn it
-                <span className="keyboard-tip">
-                  , or press R while dragging. Keys: Tab, Enter, arrows, R, Delete
-                </span>
+                <span className="keyboard-tip">, or press R while dragging. Keys: Tab, Enter, arrows, R, Delete</span>
                 <span className="touch-tip">, or tap with a second finger while dragging</span>.
               </>
             )}
@@ -341,7 +342,7 @@ export function Play({ id, go, found, onSolved }: Props) {
         />
       )}
       <SolveGust gust={gusts} />
-      <LookSwitcher />
+      <SoundSampler soundOn={soundOn} />
     </main>
   )
 }
