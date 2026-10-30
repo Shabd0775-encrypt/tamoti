@@ -1,13 +1,16 @@
 // The library: pick a board size, see its pieces, choose a puzzle.
 
 import type { CSSProperties } from 'react'
+import { BrushDivider } from '../components/BrushDivider'
+import { Footer } from '../components/Footer'
 import { Hero } from '../components/hero/Hero'
-import { Icon } from '../components/Icon'
-import { MiniBoard } from '../components/MiniBoard'
+import { Seal } from '../components/hero/Seal'
+import { PaintedBoard } from '../components/PaintedBoard'
 import { Piece } from '../components/Piece'
 import { SizePicker } from '../components/SizePicker'
 import { toneFor } from '../components/tone'
 import { library, puzzleId, sizes, tierNames, type Tier } from '../game/library'
+import { useReveal } from '../hooks/useReveal'
 import type { Go } from '../state/route'
 
 const tierNotes: Record<Tier, string> = {
@@ -28,6 +31,7 @@ export function Library({ size, go, solved }: Props) {
   const solvedHere = puzzles.filter((p) => solved.has(puzzleId(size, p.number))).length
   const tiers = Object.keys(tierNames) as Tier[]
   const next = puzzles.find((p) => !solved.has(puzzleId(size, p.number))) ?? puzzles[0]
+  useReveal(size) // new boards appear when the size changes, so look again
 
   return (
     <main className="library">
@@ -53,64 +57,82 @@ export function Library({ size, go, solved }: Props) {
           onChoose={(s) => go({ screen: 'library', size: s })}
         />
 
+        <BrushDivider />
+
         <section className="piece-set" aria-labelledby="piece-set-title" style={{ '--size': size } as CSSProperties}>
-          <h2 id="piece-set-title">
-            The {pieces.length} pieces for {size}×{size}
-          </h2>
-          <div className="piece-set-row">
-            {pieces.map((piece, index) => (
-              <figure key={piece.id}>
-                <Piece w={piece.w} h={piece.h} tone={toneFor(index)} />
-                <figcaption>
-                  {piece.w}×{piece.h}
-                </figcaption>
-              </figure>
-            ))}
+          <div className="section-head" data-reveal>
+            <h2 id="piece-set-title">
+              The pieces for {size}×{size}
+            </h2>
+            <p>
+              Every {size}×{size} board is filled with these {pieces.length}. No two are the same shape, and the dark
+              squares never move.
+            </p>
           </div>
-          <p className="piece-set-progress">
-            {solvedHere === 0
-              ? `${puzzles.length} puzzles, from gentle to deep.`
-              : `${solvedHere} of ${puzzles.length} solved.`}
-          </p>
+          <ul className="piece-sheet" role="list">
+            {pieces.map((piece, index) => (
+              <li key={piece.id} data-reveal style={{ '--d': `${index * 70}ms` } as CSSProperties}>
+                <Piece w={piece.w} h={piece.h} tone={toneFor(index)} />
+                <span className="piece-size">
+                  {piece.w}×{piece.h}
+                </span>
+              </li>
+            ))}
+          </ul>
         </section>
 
-        {tiers.map((tier) => {
-          const inTier = puzzles.filter((p) => p.tier === tier)
-          if (inTier.length === 0) return null
-          return (
-            <section key={tier} className="tier" aria-labelledby={`tier-${tier}`}>
-              <div className="tier-head">
-                <h2 id={`tier-${tier}`}>{tierNames[tier]}</h2>
-                <p>{tierNotes[tier]}</p>
+        <BrushDivider />
+
+        <section className="puzzles" aria-labelledby="puzzles-title">
+          <div className="section-head" data-reveal>
+            <h2 id="puzzles-title">The {puzzles.length} boards</h2>
+            <p>
+              {solvedHere === 0
+                ? 'From gentle to deep. Start anywhere; nothing is locked.'
+                : `${solvedHere} of ${puzzles.length} solved. Start anywhere; nothing is locked.`}
+            </p>
+          </div>
+
+          {tiers.map((tier) => {
+            const inTier = puzzles.filter((p) => p.tier === tier)
+            if (inTier.length === 0) return null
+            return (
+              <div key={tier} className="tier">
+                <div className="tier-head" data-reveal>
+                  <h3 id={`tier-${tier}`}>{tierNames[tier]}</h3>
+                  <p>{tierNotes[tier]}</p>
+                </div>
+                <ol className="puzzle-grid" aria-labelledby={`tier-${tier}`}>
+                  {inTier.map((p, index) => {
+                    const id = puzzleId(size, p.number)
+                    const isSolved = solved.has(id)
+                    return (
+                      <li key={id} data-reveal style={{ '--d': `${index * 60}ms` } as CSSProperties}>
+                        <button
+                          type="button"
+                          className={`puzzle-tile ${isSolved ? 'is-solved' : ''}`}
+                          onClick={(event) =>
+                            go({ screen: 'play', id }, event.currentTarget.querySelector('.painted-board'))
+                          }
+                          aria-label={`Puzzle ${p.number}, ${tierNames[tier]}${isSolved ? ', solved' : ''}`}
+                        >
+                          <span className="tile-board">
+                            <PaintedBoard size={size} blocked={p.blocked} />
+                            {isSolved && <Seal className="tile-seal" />}
+                          </span>
+                          <span className="puzzle-number">No. {p.number}</span>
+                        </button>
+                      </li>
+                    )
+                  })}
+                </ol>
               </div>
-              <ol className="puzzle-grid">
-                {inTier.map((p) => {
-                  const id = puzzleId(size, p.number)
-                  const isSolved = solved.has(id)
-                  return (
-                    <li key={id}>
-                      <button
-                        type="button"
-                        className={`puzzle-tile ${isSolved ? 'is-solved' : ''}`}
-                        onClick={(event) =>
-                          go({ screen: 'play', id }, event.currentTarget.querySelector('.mini-board'))
-                        }
-                        aria-label={`Puzzle ${p.number}, ${tierNames[tier]}${isSolved ? ', solved' : ''}`}
-                      >
-                        <MiniBoard size={size} blocked={p.blocked} />
-                        <span className="puzzle-number">
-                          No. {p.number}
-                          {isSolved && <Icon name="check" size={14} />}
-                        </span>
-                      </button>
-                    </li>
-                  )
-                })}
-              </ol>
-            </section>
-          )
-        })}
+            )
+          })}
+        </section>
       </div>
+
+      <Footer />
     </main>
   )
 }

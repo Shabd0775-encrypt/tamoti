@@ -90,143 +90,34 @@ button {
   padding: 24px 16px 80px;
 }
 
-.piece-set {
-  --set-cell: min(calc(240px / var(--size)), 26px);
-  margin-bottom: 56px;
-  padding-bottom: 40px;
-  border-bottom: 1px solid var(--rule);
-}
+/* The library's sections are in library.css. */
 
-.piece-set h2,
-.tier-head h2 {
-  margin: 0;
-  font-size: 1.125rem;
-  font-weight: 600;
-}
-
-.piece-set-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 16px 20px;
-  margin: 20px 0 16px;
-}
-
-.piece-set figure {
-  display: grid;
-  justify-items: center;
-  gap: 6px;
-  margin: 0;
-}
-
-.piece-set .piece {
-  width: calc(var(--w) * var(--set-cell));
-  height: calc(var(--h) * var(--set-cell));
-  cursor: default;
-}
-
-.piece-set figcaption {
-  color: var(--ink-soft);
-  font-size: 0.8125rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.piece-set-progress {
-  margin: 0;
-  color: var(--ink-soft);
-}
-
-.tier {
-  margin-bottom: 48px;
-}
-
-.tier-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 16px;
-  margin-bottom: 16px;
-}
-
-.tier-head p {
-  margin: 0;
-  color: var(--ink-soft);
-}
-
-.puzzle-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
-  gap: 20px 16px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.puzzle-tile {
-  display: grid;
-  gap: 8px;
+/* A small painted board (PaintedBoard.tsx): the hero's next puzzle and the library's lists. */
+.painted-board {
+  display: block;
   width: 100%;
-  padding: 0;
-  border: 0;
-  background: none;
-  text-align: left;
+  height: auto;
 }
 
-.mini-board {
-  position: relative;
-  aspect-ratio: 1;
-  border-radius: 6px;
-  background-color: var(--board);
-  background-image:
-    linear-gradient(var(--cell-line-strong) 1px, transparent 1px),
-    linear-gradient(90deg, var(--cell-line-strong) 1px, transparent 1px);
-  background-size: calc(100% / var(--size)) calc(100% / var(--size));
-  box-shadow: inset 0 0 0 1px var(--cell-line-strong);
-  transition:
-    transform 220ms var(--ease-out),
-    box-shadow 220ms var(--ease-out);
+.pb-paper {
+  fill: var(--paper-warm);
 }
 
-.mini-blocked {
-  background: var(--blocked);
-  border-radius: 2px;
+.pb-lines path {
+  stroke: var(--ink-300);
+  stroke-width: 3;
 }
 
-.puzzle-tile:hover .mini-board {
-  transform: translateY(-2px);
-  box-shadow:
-    inset 0 0 0 1px var(--cell-line-strong),
-    0 8px 18px -10px color-mix(in oklab, var(--ink-900) 60%, transparent);
+.pb-frame {
+  fill: none;
+  stroke: var(--ink-900);
+  stroke-width: 10;
+  opacity: 0.78;
 }
 
-.puzzle-tile.is-solved .mini-board {
-  background-color: color-mix(in oklab, var(--mist-teal) 45%, var(--paper));
-}
-
-.puzzle-number {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.875rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.puzzle-tile.is-solved .puzzle-number {
-  color: var(--ink-soft);
-}
-
-@media (max-width: 560px) {
-
-  .puzzle-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px 12px;
-  }
+.pb-blocked {
+  fill: var(--ink-700);
+  transition: fill 600ms var(--ease-out);
 }
 
 /* The play screen is in play.css. */
-
-@media (prefers-reduced-motion: reduce) {
-  .mini-board {
-    transition: none;
-  }
-}

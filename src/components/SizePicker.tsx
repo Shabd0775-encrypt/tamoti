@@ -34,7 +34,7 @@ function gridLines(n: number) {
 export function SizePicker({ sizes, current, progress, onChoose }: Props) {
   return (
     <section className="size-picker" id="boards" aria-labelledby="boards-title">
-      <div className="size-picker-intro">
+      <div className="size-picker-intro" data-reveal>
         <h2 id="boards-title">Choose a board</h2>
         <p>Six sizes, from a few quiet minutes at 5×5 to a long, slow sit with 10×10.</p>
       </div>
@@ -43,7 +43,7 @@ export function SizePicker({ sizes, current, progress, onChoose }: Props) {
         {sizes.map((n) => {
           const { done, total } = progress[n]
           return (
-            <li key={n} style={{ '--n': n } as CSSProperties}>
+            <li key={n} data-reveal style={{ '--n': n, '--d': `${(n - 5) * 60}ms` } as CSSProperties}>
               <button
                 type="button"
                 aria-pressed={n === current}

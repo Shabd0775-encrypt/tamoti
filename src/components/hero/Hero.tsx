@@ -63,7 +63,7 @@ export function Hero({ size, next, onBegin }: Props) {
   const label = `${size}×${size}, No. ${next.number}`
 
   return (
-    <section className="hero" ref={root} aria-labelledby="hero-title">
+    <section className="hero" id="top" ref={root} aria-labelledby="hero-title">
       <div className="hero-glow" aria-hidden="true" />
       <div className="mountains" aria-hidden="true">
         <Backdrop />

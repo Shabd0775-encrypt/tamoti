@@ -217,32 +217,11 @@
   transition: transform 800ms var(--ease-out);
 }
 
-.board-paper {
-  fill: var(--paper-warm);
-}
-
-.board-lines path {
-  stroke: var(--ink-300);
-  stroke-width: 3;
-}
-
-.board-frame {
-  fill: none;
-  stroke: var(--ink-900);
-  stroke-width: 10;
-  opacity: 0.78;
-}
-
-.board-blocked {
-  fill: var(--ink-700);
-  transition: fill 600ms var(--ease-out);
-}
-
 .board-preview:hover svg {
   transform: scale(1.025) rotate(-0.6deg);
 }
 
-.board-preview:hover .board-blocked {
+.board-preview:hover .pb-blocked {
   fill: var(--ink-900);
 }
 
@@ -405,14 +384,14 @@
   */
   .mountains {
     width: 250vw;
-    left: -62vw;
-    bottom: -4%;
+    left: -80vw;
+    bottom: -7%;
   }
 
   .hero-tree-wrap {
-    width: 100vw;
-    left: -6vw;
-    bottom: -5svh;
+    width: 96vw;
+    left: -8vw;
+    bottom: -1svh;
   }
 
   .hero-copy {
