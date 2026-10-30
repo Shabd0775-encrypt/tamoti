@@ -408,7 +408,10 @@ export function Emaki() {
       const progress = Math.min(1, Math.max(0, -box.top / Math.max(1, box.height - window.innerHeight)))
       // Each sheet is moved directly (a transform the graphics card handles alone), which keeps scrolling smooth.
       for (const [sheet, pace] of sheets) {
-        const travel = sheet.getBoundingClientRect().width - window.innerWidth
+        // The sheet's width follows from its height and the painting's proportions (W × H), which every
+        // browser reports the same way; how far it can slide is whatever of it is off screen.
+        const width = (sheet.getBoundingClientRect().height * W) / H
+        const travel = Math.max(0, width - window.innerWidth)
         sheet.style.transform = `translate3d(${(-progress * travel * pace).toFixed(1)}px, 0, 0)`
       }
       if (dusk) dusk.style.opacity = (progress * 0.85).toFixed(3)
