@@ -172,7 +172,7 @@ export function Play({ id, go, found, onSolved }: Props) {
   // Share the board: the phone's share sheet where there is one, otherwise copy the link.
   const share = async () => {
     const url = `${window.location.origin}${window.location.pathname}?p=${id}`
-    const title = `Grid Puzzle, ${entry.size}×${entry.size} No. ${entry.number}`
+    const title = `Tamoti, ${entry.size}×${entry.size} No. ${entry.number}`
     try {
       if (navigator.share) await navigator.share({ title, url })
       else {

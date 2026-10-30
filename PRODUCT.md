@@ -41,7 +41,7 @@ A calm alternative to the feed, not another attention trap. Puzzles are generate
 - Solution count, plus a gallery of the solutions the player has found.
 - One daily puzzle, the same for everyone. Puzzles can be shared by link.
 - No accounts and no server.
-- **Undecided:** the product name (chosen during the design exploration), and whether there are soft sounds (off by default if added).
+- **Name:** Tamoti. Soft sounds are in, off by default.
 
 ## Brand Commitments
 

@@ -1,4 +1,3 @@
-import { FontSwitcher } from './components/FontSwitcher'
 import { WashFilters } from './components/hero/WashFilters'
 import { Library } from './screens/Library'
 import { Play } from './screens/Play'
@@ -19,7 +18,6 @@ export default function App() {
       ) : (
         <Library size={route.size} go={go} solved={solved} found={found} />
       )}
-      <FontSwitcher />
     </>
   )
 }

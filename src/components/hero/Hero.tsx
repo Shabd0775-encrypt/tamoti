@@ -77,7 +77,7 @@ export function Hero({ size, next, onBegin, daily }: Props) {
 
       <div className="hero-copy">
         <div className="hero-title-row">
-          <h1 id="hero-title">Grid Puzzle</h1>
+          <h1 id="hero-title">Tamoti</h1>
           <Seal className="hero-seal" />
         </div>
         <p className="hero-lede">

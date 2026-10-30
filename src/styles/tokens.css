@@ -79,66 +79,20 @@
 
   /*
     Type, in four roles:
-      display  headings: a high-contrast serif that echoes mincho brushwork;
-      brand    the name, in the hero and the footer: a brush face;
-      accent   the italic for one picked-out word, and for highlights;
-      ui       everything you read.
-    Japanese (the seal and the calligraphy) is always Shippori Mincho.
-    These are the recommended set; others are on trial (see FontSwitcher.tsx).
+      display  headings: Shippori Mincho, whose letters are slightly brush-tipped;
+      brand    the name, Tamoti, in the hero and the footer: Kaushan Script, a flowing brush;
+      accent   the italic for one picked-out word in a heading: Cormorant Garamond
+               (Shippori Mincho has no italic of its own);
+      ui       everything you read: Zen Kaku Gothic New.
+    Japanese (the seal and the calligraphy) is Shippori Mincho too.
   */
   --font-japanese: 'Shippori Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
-  --font-display: 'Cormorant Garamond', 'Times New Roman', serif;
-  --display-tracking: 0.01em;
-  /* Cormorant's lowercase letters are short; this sets them to a comfortable height. */
-  --display-adjust: 0.47;
-  --font-brand: 'Yuji Syuku', var(--font-japanese);
-  --brand-tracking: 0.02em;
-  --brand-adjust: none;
-  --font-accent: 'Cormorant Garamond', 'Times New Roman', serif;
-  --accent-scale: 1;
-  --font-ui: 'Zen Kaku Gothic New', 'Hiragino Sans', system-ui, sans-serif;
-}
-
-/* Headings on trial. Shippori Mincho, Marcellus and Gilda have no italic, so picked-out words stay in Cormorant italic. */
-:root[data-heading='mincho'] {
   --font-display: var(--font-japanese);
   --display-tracking: 0.04em;
-  --display-adjust: none;
-  --accent-scale: 1.12;
-}
-
-:root[data-heading='marcellus'] {
-  --font-display: 'Marcellus', 'Times New Roman', serif;
-  --display-tracking: 0.03em;
-  --display-adjust: none;
-  --accent-scale: 1.1;
-}
-
-:root[data-heading='gilda'] {
-  --font-display: 'Gilda Display', 'Times New Roman', serif;
-  --display-tracking: 0.01em;
-  --display-adjust: none;
-  --accent-scale: 1.1;
-}
-
-/* The brush face for the name, on trial. "none" sets the name in the heading face. */
-:root[data-brush='kurenaido'] {
-  --font-brand: 'Zen Kurenaido', var(--font-japanese);
-  --brand-tracking: 0.03em;
-}
-
-:root[data-brush='kaushan'] {
   --font-brand: 'Kaushan Script', cursive;
   --brand-tracking: 0;
-}
-
-:root[data-brush='none'] {
-  --font-brand: var(--font-display);
-  --brand-tracking: var(--display-tracking);
-  --brand-adjust: var(--display-adjust);
-}
-
-/* Body text on trial. */
-:root[data-body='jost'] {
-  --font-ui: 'Jost', system-ui, sans-serif;
+  --font-accent: 'Cormorant Garamond', 'Times New Roman', serif;
+  /* Cormorant's letters are small for their size, so its accent words are set a little larger. */
+  --accent-scale: 1.12;
+  --font-ui: 'Zen Kaku Gothic New', 'Hiragino Sans', system-ui, sans-serif;
 }
