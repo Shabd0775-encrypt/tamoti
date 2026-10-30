@@ -165,10 +165,10 @@ export function Library({ size, go, solved, found }: Props) {
               })}
             </section>
           </div>
+          {/* Inside the painting, so the scroll runs on to the very end of the page. */}
+          <Footer />
         </div>
       </>
-
-      <Footer />
     </main>
   )
 }
