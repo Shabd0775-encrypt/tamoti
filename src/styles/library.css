@@ -591,11 +591,11 @@
   gap: clamp(14px, 1.6vw, 24px);
   margin: 0;
   color: var(--ink-900);
-  font-family: var(--font-display);
-  font-size-adjust: var(--display-adjust, none);
+  font-family: var(--font-brand);
+  font-size-adjust: var(--brand-adjust, none);
   font-size: clamp(3rem, 9vw, 7.5rem);
   line-height: 1;
-  letter-spacing: var(--display-tracking);
+  letter-spacing: var(--brand-tracking);
   white-space: nowrap;
 }
 

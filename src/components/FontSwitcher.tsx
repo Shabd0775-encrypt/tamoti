@@ -1,53 +1,81 @@
-// TEMPORARY: a small bar for trying display typefaces. Each sets the font for
-// headings and the name, and the italic used for picked-out words (see
-// tokens.css, :root[data-font]). Kept in the address (?font=instrument) and
-// remembered. Delete this once a typeface is chosen.
+// TEMPORARY: a small bar for trying typefaces in three roles: the headings,
+// the brush face for the name, and the body text. Each choice sets a data-
+// attribute on <html> that tokens.css picks up. Kept in the address
+// (?heading=gilda&brush=kaushan&body=jost) and remembered.
+// Delete this once the type is chosen.
 
 import { useEffect, useState } from 'react'
 
-const fonts = {
-  mincho: 'Mincho + Cormorant italic',
-  cormorant: 'Cormorant',
-  instrument: 'Instrument Serif',
-  dmserif: 'DM Serif Display',
-}
+const roles = {
+  heading: {
+    label: 'Headings',
+    options: {
+      cormorant: 'Cormorant Garamond',
+      mincho: 'Shippori Mincho',
+      marcellus: 'Marcellus',
+      gilda: 'Gilda Display',
+    },
+  },
+  brush: {
+    label: 'Name',
+    options: { yuji: 'Yuji Syuku', kurenaido: 'Zen Kurenaido', kaushan: 'Kaushan Script', none: 'Same as headings' },
+  },
+  body: {
+    label: 'Body',
+    options: { zenkaku: 'Zen Kaku Gothic New', jost: 'Jost' },
+  },
+} as const
 
-function initial(): string {
-  const choices = Object.keys(fonts)
-  const fromAddress = new URLSearchParams(window.location.search).get('font')
-  let saved: string | null = null
-  try {
-    saved = localStorage.getItem('look-font')
-  } catch {
-    // Storage can be blocked; fall back to the first option.
+type Role = keyof typeof roles
+type Choice = Record<Role, string>
+
+function initial(): Choice {
+  const params = new URLSearchParams(window.location.search)
+  const pick = (role: Role) => {
+    const choices = Object.keys(roles[role].options)
+    let saved: string | null = null
+    try {
+      saved = localStorage.getItem(`look-${role}`)
+    } catch {
+      // Storage can be blocked; fall back to the recommended choice.
+    }
+    return choices.find((c) => c === params.get(role)) ?? choices.find((c) => c === saved) ?? choices[0]
   }
-  return choices.find((c) => c === fromAddress) ?? choices.find((c) => c === saved) ?? choices[0]
+  return { heading: pick('heading'), brush: pick('brush'), body: pick('body') }
 }
 
 export function FontSwitcher() {
-  const [font, setFont] = useState(initial)
+  const [choice, setChoice] = useState(initial)
 
   useEffect(() => {
-    if (font === 'mincho') delete document.documentElement.dataset.font
-    else document.documentElement.dataset.font = font
-  }, [font])
+    const root = document.documentElement
+    for (const role of Object.keys(roles) as Role[]) {
+      const first = Object.keys(roles[role].options)[0]
+      if (choice[role] === first) delete root.dataset[role]
+      else root.dataset[role] = choice[role]
+    }
+  }, [choice])
 
-  const choose = (value: string) => {
-    setFont(value)
+  const choose = (role: Role, value: string) => {
+    setChoice((c) => ({ ...c, [role]: value }))
     try {
-      localStorage.setItem('look-font', value)
+      localStorage.setItem(`look-${role}`, value)
     } catch {
       // Not remembered; that's fine.
     }
   }
 
   return (
-    <div className="font-switcher" role="group" aria-label="Display typeface">
-      <span className="switcher-label">Type</span>
-      {Object.entries(fonts).map(([value, label]) => (
-        <button key={value} type="button" aria-pressed={font === value} onClick={() => choose(value)}>
-          {label}
-        </button>
+    <div className="font-switcher">
+      {(Object.keys(roles) as Role[]).map((role) => (
+        <div key={role} role="group" aria-label={roles[role].label}>
+          <span className="switcher-label">{roles[role].label}</span>
+          {Object.entries(roles[role].options).map(([value, label]) => (
+            <button key={value} type="button" aria-pressed={choice[role] === value} onClick={() => choose(role, value)}>
+              {label}
+            </button>
+          ))}
+        </div>
       ))}
     </div>
   )

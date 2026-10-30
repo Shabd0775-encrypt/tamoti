@@ -167,21 +167,27 @@ button {
 .font-switcher {
   position: fixed;
   left: 50%;
-  bottom: 16px;
+  bottom: 12px;
   z-index: 30;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  display: grid;
   gap: 2px;
   max-width: calc(100% - 24px);
-  padding: 6px 10px;
-  border-radius: 999px;
+  padding: 8px 12px;
+  border-radius: 14px;
   background: var(--paper);
   box-shadow: 0 6px 20px -10px color-mix(in oklab, var(--ink-900) 50%, transparent);
   translate: -50% 0;
 }
 
+.font-switcher [role='group'] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+}
+
 .switcher-label {
+  width: 70px;
   margin-right: 6px;
   color: var(--ink-700);
   font-size: 0.8125rem;

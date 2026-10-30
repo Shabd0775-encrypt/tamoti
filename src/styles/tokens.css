@@ -78,41 +78,67 @@
   --reveal: 900ms;
 
   /*
-    Type. Display: headings and the name. Accent: the italic for a word picked
-    out in a heading, and for highlighted words. Japanese: the seal and the
-    calligraphy, always Shippori Mincho. UI: everything you read.
-    The display face is being chosen (see FontSwitcher.tsx); this is option 1.
+    Type, in four roles:
+      display  headings: a high-contrast serif that echoes mincho brushwork;
+      brand    the name, in the hero and the footer: a brush face;
+      accent   the italic for one picked-out word, and for highlights;
+      ui       everything you read.
+    Japanese (the seal and the calligraphy) is always Shippori Mincho.
+    These are the recommended set; others are on trial (see FontSwitcher.tsx).
   */
   --font-japanese: 'Shippori Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
-  --font-display: var(--font-japanese);
+  --font-display: 'Cormorant Garamond', 'Times New Roman', serif;
+  --display-tracking: 0.01em;
+  /* Cormorant's lowercase letters are short; this sets them to a comfortable height. */
+  --display-adjust: 0.47;
+  --font-brand: 'Yuji Syuku', var(--font-japanese);
+  --brand-tracking: 0.02em;
+  --brand-adjust: none;
   --font-accent: 'Cormorant Garamond', 'Times New Roman', serif;
-  --display-tracking: 0.04em;
-  /* Cormorant's letters are small for their size, so its accent words are set a little larger. */
-  --accent-scale: 1.12;
+  --accent-scale: 1;
   --font-ui: 'Zen Kaku Gothic New', 'Hiragino Sans', system-ui, sans-serif;
 }
 
-/* The other display faces on trial, each with its own true italic. */
-:root[data-font='cormorant'] {
-  --font-display: 'Cormorant Garamond', 'Times New Roman', serif;
-  --font-accent: 'Cormorant Garamond', 'Times New Roman', serif;
+/* Headings on trial. Shippori Mincho, Marcellus and Gilda have no italic, so picked-out words stay in Cormorant italic. */
+:root[data-heading='mincho'] {
+  --font-display: var(--font-japanese);
+  --display-tracking: 0.04em;
+  --display-adjust: none;
+  --accent-scale: 1.12;
+}
+
+:root[data-heading='marcellus'] {
+  --font-display: 'Marcellus', 'Times New Roman', serif;
+  --display-tracking: 0.03em;
+  --display-adjust: none;
+  --accent-scale: 1.1;
+}
+
+:root[data-heading='gilda'] {
+  --font-display: 'Gilda Display', 'Times New Roman', serif;
   --display-tracking: 0.01em;
-  /* Its lowercase letters are short; this sets them to the same height as the others'. */
-  --display-adjust: 0.47;
-  --accent-scale: 1;
+  --display-adjust: none;
+  --accent-scale: 1.1;
 }
 
-:root[data-font='instrument'] {
-  --font-display: 'Instrument Serif', 'Times New Roman', serif;
-  --font-accent: 'Instrument Serif', 'Times New Roman', serif;
-  --display-tracking: -0.005em;
-  --display-adjust: 0.5;
-  --accent-scale: 1;
+/* The brush face for the name, on trial. "none" sets the name in the heading face. */
+:root[data-brush='kurenaido'] {
+  --font-brand: 'Zen Kurenaido', var(--font-japanese);
+  --brand-tracking: 0.03em;
 }
 
-:root[data-font='dmserif'] {
-  --font-display: 'DM Serif Display', 'Times New Roman', serif;
-  --font-accent: 'DM Serif Display', 'Times New Roman', serif;
-  --display-tracking: -0.01em;
-  --accent-scale: 1;
+:root[data-brush='kaushan'] {
+  --font-brand: 'Kaushan Script', cursive;
+  --brand-tracking: 0;
+}
+
+:root[data-brush='none'] {
+  --font-brand: var(--font-display);
+  --brand-tracking: var(--display-tracking);
+  --brand-adjust: var(--display-adjust);
+}
+
+/* Body text on trial. */
+:root[data-body='jost'] {
+  --font-ui: 'Jost', system-ui, sans-serif;
 }
