@@ -1,4 +1,4 @@
-import type { CSSProperties, PointerEvent } from 'react'
+import type { CSSProperties, KeyboardEvent, PointerEvent } from 'react'
 import { currentFootprint, type GameState } from '../state/gameReducer'
 import { Piece } from './Piece'
 import { toneFor } from './tone'
@@ -8,10 +8,11 @@ type Props = {
   liftedId: string | null
   onPiecePointerDown: (event: PointerEvent<HTMLDivElement>, pieceId: string) => void
   onRotate: (pieceId: string) => void
+  onPieceKeyDown: (event: KeyboardEvent<HTMLDivElement>, pieceId: string) => void
 }
 
 /** The pieces still waiting to be placed. */
-export function Tray({ state, liftedId, onPiecePointerDown, onRotate }: Props) {
+export function Tray({ state, liftedId, onPiecePointerDown, onRotate, onPieceKeyDown }: Props) {
   return (
     <div className="tray">
       {state.puzzle.pieces.map((piece, index) => {
@@ -28,6 +29,9 @@ export function Tray({ state, liftedId, onPiecePointerDown, onRotate }: Props) {
             style={{ '--i': index } as CSSProperties}
             onPointerDown={(event) => onPiecePointerDown(event, piece.id)}
             onContextMenu={() => onRotate(piece.id)}
+            onKeyDown={(event) => onPieceKeyDown(event, piece.id)}
+            label={`${w} by ${h} piece, in the tray. Enter puts it on the board; R turns it.`}
+            pieceId={piece.id}
           />
         )
       })}

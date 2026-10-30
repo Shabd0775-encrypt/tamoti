@@ -1,4 +1,4 @@
-import type { CSSProperties, PointerEvent, Ref } from 'react'
+import type { CSSProperties, KeyboardEvent, PointerEvent, Ref } from 'react'
 import { clashes, footprint } from '../game/board'
 import type { GameState } from '../state/gameReducer'
 import type { DropTarget } from '../state/useDrag'
@@ -13,6 +13,7 @@ type Props = {
   target: DropTarget | null
   onPiecePointerDown: (event: PointerEvent<HTMLDivElement>, pieceId: string) => void
   onRotate: (pieceId: string) => void
+  onPieceKeyDown: (event: KeyboardEvent<HTMLDivElement>, pieceId: string) => void
   /** Once solved, the red seal is stamped in the corner. */
   solved: boolean
   /** A piece a hint just placed, which glows softly as it settles. */
@@ -54,7 +55,18 @@ function BoardRules({ size }: { size: number }) {
 const spot = (row: number, col: number, w: number, h: number) =>
   ({ '--r': row, '--c': col, '--w': w, '--h': h }) as CSSProperties
 
-export function Board({ ref, state, liftedId, target, onPiecePointerDown, onRotate, solved, hinted, flagged }: Props) {
+export function Board({
+  ref,
+  state,
+  liftedId,
+  target,
+  onPiecePointerDown,
+  onRotate,
+  onPieceKeyDown,
+  solved,
+  hinted,
+  flagged,
+}: Props) {
   const { puzzle, placements } = state
   const dragged = puzzle.pieces.find((p) => p.id === liftedId)
   const ghost = target && dragged && { ...target, ...footprint(dragged, target.rotated) }
@@ -91,6 +103,9 @@ export function Board({ ref, state, liftedId, target, onPiecePointerDown, onRota
               style={spot(at.row, at.col, w, h)}
               onPointerDown={(event) => onPiecePointerDown(event, pieceId)}
               onContextMenu={() => onRotate(pieceId)}
+              onKeyDown={(event) => onPieceKeyDown(event, pieceId)}
+              label={`${w} by ${h} piece, row ${at.row + 1}, column ${at.col + 1}${clash.pieces.has(pieceId) ? ', overlapping' : ''}`}
+              pieceId={pieceId}
             />
           )
         })}

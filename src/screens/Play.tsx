@@ -1,6 +1,6 @@
 // The play screen: board, tray, and the controls around them.
 
-import { useEffect, useReducer, useRef, useState, type CSSProperties, type Dispatch } from 'react'
+import { useEffect, useReducer, useRef, useState, type CSSProperties, type Dispatch, type KeyboardEvent } from 'react'
 import { Board } from '../components/Board'
 import { BrushButton } from '../components/BrushButton'
 import { Icon } from '../components/Icon'
@@ -10,11 +10,11 @@ import { PlayScenery, SolveGust } from '../components/PlayScenery'
 import { SolutionThumb } from '../components/SolutionThumb'
 import { toneFor } from '../components/tone'
 import { Tray } from '../components/Tray'
-import { clashes, footprint, isSolved } from '../game/board'
+import { canPlace, clashes, footprint, isSolved, onBoard, turnInPlace } from '../game/board'
 import { dailyPuzzleId } from '../game/daily'
 import { hint, parseSolutionKey, solutionKey } from '../game/hints'
 import { findPuzzle, library, puzzleId, tierNames } from '../game/library'
-import { gameReducer, newGame, type GameAction } from '../state/gameReducer'
+import { currentFootprint, gameReducer, newGame, type GameAction } from '../state/gameReducer'
 import type { Go } from '../state/route'
 import { play, useSound } from '../state/sound'
 import { useDrag } from '../state/useDrag'
@@ -82,6 +82,77 @@ export function Play({ id, go, found, onSolved }: Props) {
     onSolved(id, key)
   }, [key, found, id, onSolved, soundOn])
 
+  // ----- Playing from the keyboard -----
+  // Tab reaches every piece. In the tray, Enter (or Space) puts a piece on the
+  // board, in the first spot where it fits cleanly. On the board, the arrow
+  // keys move it a square at a time, R turns it, and Delete sends it back.
+  // After each move, focus returns to the same piece, and a hidden line of
+  // text tells screen readers where it is now.
+  const [announcement, setAnnouncement] = useState('')
+  const refocus = useRef<string | null>(null)
+  useEffect(() => {
+    if (!refocus.current) return
+    document.querySelector<HTMLElement>(`[data-piece="${refocus.current}"]`)?.focus()
+    refocus.current = null
+  })
+
+  const firstCleanSpot = (pieceId: string) => {
+    const { rotated } = currentFootprint(state, pieceId)
+    for (const turn of [rotated, !rotated]) {
+      for (let row = 0; row < puzzle.size; row++) {
+        for (let col = 0; col < puzzle.size; col++) {
+          const at = { row, col, rotated: turn }
+          if (canPlace(puzzle, state.placements, pieceId, at)) return at
+        }
+      }
+    }
+    return { row: 0, col: 0, rotated } // nowhere clean: it goes in the corner, overlapping, to be moved
+  }
+
+  const onPieceKeyDown = (event: KeyboardEvent<HTMLDivElement>, pieceId: string) => {
+    const at = state.placements[pieceId]
+    const say = (where: { row: number; col: number }) =>
+      setAnnouncement(`Row ${where.row + 1}, column ${where.col + 1}.`)
+    const key = event.key
+    if (!at) {
+      if (key === 'Enter' || key === ' ') {
+        event.preventDefault()
+        const spot = firstCleanSpot(pieceId)
+        dispatch({ type: 'place', pieceId, at: spot })
+        refocus.current = pieceId
+        say(spot)
+      } else if (key === 'r' || key === 'R') {
+        dispatch({ type: 'rotate', pieceId })
+        refocus.current = pieceId
+      }
+      return
+    }
+    const step: Record<string, [number, number]> = {
+      ArrowUp: [-1, 0],
+      ArrowDown: [1, 0],
+      ArrowLeft: [0, -1],
+      ArrowRight: [0, 1],
+    }
+    if (step[key]) {
+      event.preventDefault()
+      const next = { ...at, row: at.row + step[key][0], col: at.col + step[key][1] }
+      if (onBoard(puzzle, pieceId, next)) {
+        dispatch({ type: 'place', pieceId, at: next })
+        say(next)
+      }
+      refocus.current = pieceId
+    } else if (key === 'r' || key === 'R') {
+      dispatch({ type: 'rotate', pieceId })
+      say(turnInPlace(puzzle, pieceId, at))
+      refocus.current = pieceId
+    } else if (key === 'Delete' || key === 'Backspace') {
+      event.preventDefault()
+      dispatch({ type: 'remove', pieceId })
+      setAnnouncement('Back in the tray.')
+      refocus.current = pieceId
+    }
+  }
+
   // A hint only shows until the next move.
   const hintNow = shownHint && shownHint.move === state.history.length ? shownHint : null
 
@@ -147,13 +218,23 @@ export function Play({ id, go, found, onSolved }: Props) {
           target={target}
           onPiecePointerDown={startDrag}
           onRotate={rotate}
+          onPieceKeyDown={onPieceKeyDown}
           solved={solved}
           hinted={hintNow?.kind === 'place' ? hintNow.pieceId : null}
           flagged={hintNow?.kind === 'rethink' ? hintNow.pieceId : null}
         />
 
         <aside>
-          <Tray state={state} liftedId={drag?.pieceId ?? null} onPiecePointerDown={startDrag} onRotate={rotate} />
+          <Tray
+            state={state}
+            liftedId={drag?.pieceId ?? null}
+            onPiecePointerDown={startDrag}
+            onRotate={rotate}
+            onPieceKeyDown={onPieceKeyDown}
+          />
+          <p className="visually-hidden" aria-live="polite">
+            {announcement}
+          </p>
 
           <p className="status" aria-live="polite">
             {solved ? (
@@ -188,7 +269,9 @@ export function Play({ id, go, found, onSolved }: Props) {
                   {piecesLeft} {piecesLeft === 1 ? 'piece' : 'pieces'} to place
                 </strong>
                 Drag a piece onto the board; pieces can overlap while you try things. Tap a piece to turn it
-                <span className="keyboard-tip">, or press R while dragging</span>
+                <span className="keyboard-tip">
+                  , or press R while dragging. Keys: Tab, Enter, arrows, R, Delete
+                </span>
                 <span className="touch-tip">, or tap with a second finger while dragging</span>.
               </>
             )}

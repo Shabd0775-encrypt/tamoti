@@ -321,7 +321,7 @@ button.hero-more {
 .hero-vertical {
   position: absolute;
   top: clamp(96px, 19svh, 210px);
-  right: clamp(14px, 2vw, 36px);
+  right: clamp(18px, 2.2vw, 36px);
   z-index: 6;
   margin: 0;
   writing-mode: vertical-rl;

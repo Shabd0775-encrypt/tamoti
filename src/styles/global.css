@@ -59,6 +59,17 @@ h2 {
   box-shadow: 0 0 0 7px color-mix(in oklab, var(--ink-700) 12%, transparent);
 }
 
+/* Read aloud by screen readers, but not shown. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 button {
   font: inherit;
   color: inherit;
