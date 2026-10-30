@@ -393,13 +393,25 @@ export function Emaki() {
   // How far through the page you are, from 0 to 1, drives the slide and the light.
   useEffect(() => {
     const el = stage.current?.parentElement
-    if (!el) return
+    if (!el || !stage.current) return
+    // How far each sheet slides across its width: far ones a little, near ones all the way.
+    const sheets: Array<[SVGSVGElement, number]> = [
+      [stage.current.querySelector<SVGSVGElement>('.emaki-far')!, 0.45],
+      [stage.current.querySelector<SVGSVGElement>('.emaki-mid')!, 0.75],
+      [stage.current.querySelector<SVGSVGElement>('.emaki-near')!, 1],
+    ]
+    const dusk = stage.current.querySelector<HTMLElement>('.emaki-dusk')
     let frame = 0
     const update = () => {
       frame = 0
       const box = el.getBoundingClientRect()
       const progress = Math.min(1, Math.max(0, -box.top / Math.max(1, box.height - window.innerHeight)))
-      stage.current?.style.setProperty('--p', progress.toFixed(4))
+      // Each sheet is moved directly (a transform the graphics card handles alone), which keeps scrolling smooth.
+      for (const [sheet, pace] of sheets) {
+        const travel = sheet.getBoundingClientRect().width - window.innerWidth
+        sheet.style.transform = `translate3d(${(-progress * travel * pace).toFixed(1)}px, 0, 0)`
+      }
+      if (dusk) dusk.style.opacity = (progress * 0.85).toFixed(3)
     }
     const onScroll = () => {
       if (!frame) frame = requestAnimationFrame(update)

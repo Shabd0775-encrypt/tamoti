@@ -27,9 +27,9 @@ body {
 /*
   Rice-paper grain over everything. Two layers of SVG noise drawn once as
   small tiles: a fine fiber, and a larger soft mottling like cold-press
-  watercolor paper. "multiply" lets it darken whatever is underneath, the
-  way paper texture shows through paint. pointer-events: none means clicks
-  pass straight through it.
+  watercolor paper, laid over everything at half strength, the way paper
+  texture shows through paint. pointer-events: none means clicks pass
+  straight through it.
 */
 body::after {
   content: '';
@@ -38,7 +38,8 @@ body::after {
   z-index: 100;
   pointer-events: none;
   opacity: 0.5;
-  mix-blend-mode: multiply;
+  /* Its own layer, drawn once: it isn't blended into the page beneath, so scrolling never has to redraw it. */
+  will-change: transform;
   background-image:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .42 0 0 0 0 .38 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E"),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='640'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.012' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .55 0 0 0 0 .5 0 0 0 0 .44 0 0 0 .16 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");

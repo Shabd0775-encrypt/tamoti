@@ -790,6 +790,22 @@
   isolation: isolate;
 }
 
+/*
+  Where the hero ends, the scroll painting begins in plain paper: this band
+  lies over the top of it and fades out downward, so the hero's own fade to
+  white carries straight on, and the painting's colors come back gradually.
+  It's last in the stack below the words, so it covers the painting but not them.
+*/
+.library-rest::after {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: -1;
+  height: 90vh;
+  background: linear-gradient(to bottom, var(--paper) 0%, var(--paper) 18%, color-mix(in oklab, var(--paper) 55%, transparent) 55%, transparent 100%);
+  pointer-events: none;
+}
+
 /* The scroll painting: held on screen (sticky) all the way from the hero to the footer. */
 .emaki {
   position: absolute;
@@ -799,8 +815,6 @@
 }
 
 .emaki-stage {
-  --p: 0;
-
   position: sticky;
   top: 0;
   height: 100vh;
@@ -816,7 +830,8 @@
   background:
     linear-gradient(to bottom, color-mix(in oklab, var(--mist-teal) 45%, var(--paper)), transparent 40%),
     linear-gradient(to bottom, transparent 40%, color-mix(in oklab, var(--sakura-100) 90%, var(--glow-300)) 62%, var(--paper) 85%);
-  opacity: calc(var(--p) * 0.85);
+  opacity: 0;
+  will-change: opacity;
 }
 
 .emaki-layer {
@@ -830,20 +845,17 @@
   will-change: transform;
 }
 
-/* Each sheet slides at its own pace: far ones a little, near ones the full width. */
+/* Each sheet slides at its own pace as you scroll (set in Emaki.tsx): far ones a little, near ones the full width. */
 .emaki-far {
   opacity: 0.72;
-  translate: calc(var(--p) * -1 * (100% - 100vw) * 0.45) 0;
 }
 
 .emaki-mid {
   opacity: 0.8;
-  translate: calc(var(--p) * -1 * (100% - 100vw) * 0.75) 0;
 }
 
 .emaki-near {
   opacity: 0.75;
-  translate: calc(var(--p) * -1 * (100% - 100vw)) 0;
 }
 
 /* Phones: the painting scales with the screen's height, so on a narrow screen it would loom.
