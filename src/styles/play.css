@@ -8,7 +8,8 @@
   /* The board is as big as the screen allows. Cell sizes follow from it. */
   --board-size: min(100vw - 52px, 64dvh, 580px);
   --cell-size: calc(var(--board-size) / var(--size));
-  --tray-cell: min(calc(var(--cell-size) * 0.6), 34px);
+  /* Tray pieces shrink when a set is big, so the tray never pushes everything else away (see Play.tsx). */
+  --tray-cell: min(calc(var(--cell-size) * 0.6), var(--tray-cap, 34px));
 
   position: relative;
   isolation: isolate;
@@ -79,7 +80,7 @@
   font-weight: 400;
   line-height: 1.2;
   letter-spacing: var(--display-tracking);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
 .play-number {

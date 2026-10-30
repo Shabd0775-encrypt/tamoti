@@ -11,6 +11,8 @@ export type LibraryPuzzle = {
   blocked: Rect[]
   /** How many different ways there are to fill it. */
   solutions: number
+  /** How hard it is for a person, from the human-style rating (see difficulty.ts). Higher is harder. */
+  difficulty?: number
 }
 
 export type Library = {

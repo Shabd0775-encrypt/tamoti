@@ -187,10 +187,14 @@ export function Play({ id, go, found, onSolved }: Props) {
 
   const draggedIndex = drag ? puzzle.pieces.findIndex((p) => p.id === drag.pieceId) : -1
   const dragged = drag && { ...footprint(puzzle.pieces[draggedIndex], drag.rotated), tone: toneFor(draggedIndex) }
+  // The tray's square size: about 34px, smaller for big sets, so all the pieces fit in a tray about
+  // 340px wide and 260px tall (their total area × square² is roughly what the tray has to hold).
+  const totalArea = puzzle.pieces.reduce((sum, piece) => sum + piece.w * piece.h, 0)
+  const trayCap = Math.min(34, Math.floor(Math.sqrt(52_000 / totalArea)))
   const allWays = [...found, ...(key && !found.includes(key) ? [key] : [])]
 
   return (
-    <main className="play" style={{ '--size': puzzle.size } as CSSProperties}>
+    <main className="play" style={{ '--size': puzzle.size, '--tray-cap': `${trayCap}px` } as CSSProperties}>
       <PlayScenery />
       <header className="play-bar">
         <button type="button" className="back" onClick={() => go({ screen: 'library', size: entry.size })}>

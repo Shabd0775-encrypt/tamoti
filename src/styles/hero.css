@@ -230,7 +230,7 @@
   color: var(--ink-700);
   font-size: 0.875rem;
   line-height: 1.5;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
 .hero-actions {
@@ -254,7 +254,7 @@
   font-weight: 500;
   letter-spacing: 0.05em;
   white-space: nowrap;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
 .brush-stroke {

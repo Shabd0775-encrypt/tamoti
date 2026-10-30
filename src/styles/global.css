@@ -12,6 +12,8 @@ html {
 }
 
 body {
+  /* Lining figures everywhere: Cormorant's default old-style figures make "10×10" read oddly. */
+  font-variant-numeric: lining-nums;
   margin: 0;
   min-height: 100dvh;
   background: var(--page);

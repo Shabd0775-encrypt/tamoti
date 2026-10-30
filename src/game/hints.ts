@@ -8,7 +8,7 @@
 // those, so they don't count as decisions yet.
 
 import { clashes, footprint, occupancy } from './board'
-import { solve } from './solve'
+import { countSolutions } from './difficulty'
 import type { Placement, Placements, Puzzle } from './types'
 
 export type Hint =
@@ -25,7 +25,7 @@ function settled(puzzle: Puzzle, placements: Placements): Placements {
 
 export function hint(puzzle: Puzzle, placements: Placements): Hint {
   const fixed = settled(puzzle, placements)
-  const { first: solution } = solve(puzzle, { fixed, maxSolutions: 1, maxSteps: MAX_STEPS })
+  const { first: solution } = countSolutions(puzzle, 1, MAX_STEPS, fixed)
 
   if (solution) {
     // Of the pieces still to settle, suggest the one that fills the first empty square,
@@ -50,7 +50,7 @@ export function hint(puzzle: Puzzle, placements: Placements): Hint {
   const ids = Object.keys(fixed).reverse()
   for (const id of ids) {
     const { [id]: _without, ...rest } = fixed
-    if (solve(puzzle, { fixed: rest, maxSolutions: 1, maxSteps: MAX_STEPS }).first) {
+    if (countSolutions(puzzle, 1, MAX_STEPS, rest).first) {
       return { kind: 'rethink', pieceId: id }
     }
   }

@@ -1,15 +1,18 @@
 import { describe, expect, it } from 'vitest'
-import { layoutKey, pieceSets } from './generate'
+import { blockedArea, layoutKey, pieceSets, toughPositions } from './generate'
+import { countSolutions } from './difficulty'
 import { findPuzzle, library, sizes } from './library'
 import { seededRandom } from './rng'
 import { solve } from './solve'
 
 describe('piece sets', () => {
-  it('give an N×N board exactly N pieces, all different shapes', () => {
+  it('are all different shapes, none as long as the board (past 5×5), leaving a few squares to block', () => {
     for (const size of sizes) {
       const shapes = pieceSets[size].map(([w, h]) => `${Math.min(w, h)}x${Math.max(w, h)}`)
-      expect(shapes).toHaveLength(size)
-      expect(new Set(shapes).size).toBe(size)
+      expect(new Set(shapes).size, `${size}`).toBe(shapes.length)
+      // 5×5 keeps its original set, which has one strip the full width of the board (see pieceSets).
+      if (size > 5) expect(Math.max(...pieceSets[size].flat()), `${size}`).toBeLessThan(size)
+      expect(blockedArea(size), `${size}`).toBeGreaterThanOrEqual(3)
     }
   })
 })
@@ -23,8 +26,27 @@ describe('library', () => {
     for (const size of sizes) {
       for (const entry of library.sizes[size].puzzles) {
         const { puzzle } = findPuzzle(`${size}-${entry.number}`)!
-        expect(solve(puzzle).solutions, `${size}-${entry.number}`).toBe(entry.solutions)
+        const counted = countSolutions(puzzle, 50, 5_000_000)
+        expect(counted.finished, `${size}-${entry.number}`).toBe(true)
+        expect(counted.solutions, `${size}-${entry.number}`).toBe(entry.solutions)
+        // A second, independent check with the original solver, where it's quick enough.
+        if (size <= 7) expect(solve(puzzle).solutions, `${size}-${entry.number}`).toBe(entry.solutions)
       }
+    }
+  })
+
+  it('puts blockers in tough spots: no corners; past 5×5, none touching and mostly away from the edge', () => {
+    for (const size of sizes) {
+      for (const p of library.sizes[size].puzzles) {
+        expect(toughPositions(size, p.blocked), `${size}-${p.number}`).toBe(true)
+      }
+    }
+  })
+
+  it('gets harder through each size, from gentle to deep', () => {
+    for (const size of sizes) {
+      const scores = library.sizes[size].puzzles.map((p) => p.difficulty ?? 0)
+      expect(scores, `${size}`).toEqual([...scores].sort((a, b) => a - b))
     }
   })
 

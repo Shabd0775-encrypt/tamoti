@@ -17,8 +17,8 @@ import type { Found } from '../state/progress'
 import type { Go } from '../state/route'
 
 const tierNotes: Record<Tier, string> = {
-  gentle: 'A warm-up. More than one way to finish.',
-  steady: 'Look a little longer before you place.',
+  gentle: 'The place to start. Look before you place.',
+  steady: 'Fewer moves are forced. Hold more in mind.',
   tricky: 'Most pieces have only one home.',
   deep: 'Slow down. Every turn matters.',
 }

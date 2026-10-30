@@ -5,9 +5,12 @@
 
 import { useEffect, useState } from 'react'
 
-const FOUND_KEY = 'grid-puzzle:found'
-/** The older list of solved boards, from before ways were remembered. Still read, so nothing is lost. */
-const SOLVED_KEY = 'grid-puzzle:solved'
+/**
+ * Versioned, because a puzzle's number names a layout: when the library is
+ * rebuilt, "6-3" is a different board, so older progress is set aside.
+ * v2: the harder library, with blockers in tough spots (2026-10-31).
+ */
+const FOUND_KEY = 'grid-puzzle:found-v2'
 
 /** For each puzzle id, the ways found (see solutionKey in game/hints.ts). */
 export type Found = Record<string, string[]>
@@ -20,14 +23,13 @@ function read<T>(key: string, fallback: T): T {
   }
 }
 
-function load(): { found: Found; legacy: string[] } {
+function load(): Found {
   const found = read<Found>(FOUND_KEY, {})
-  const legacy = read<string[]>(SOLVED_KEY, [])
-  return { found: typeof found === 'object' && found ? found : {}, legacy: Array.isArray(legacy) ? legacy : [] }
+  return typeof found === 'object' && found ? found : {}
 }
 
 export function useProgress() {
-  const [{ found, legacy }, setProgress] = useState(load)
+  const [found, setFound] = useState(load)
 
   useEffect(() => {
     try {
@@ -37,14 +39,14 @@ export function useProgress() {
     }
   }, [found])
 
-  const solved = new Set([...legacy, ...Object.keys(found).filter((id) => found[id].length > 0)])
+  const solved = new Set(Object.keys(found).filter((id) => found[id].length > 0))
 
   /** Remember a way of filling a board, if it's new. */
   const recordSolution = (id: string, key: string) =>
-    setProgress((prev) => {
-      const ways = prev.found[id] ?? []
+    setFound((prev) => {
+      const ways = prev[id] ?? []
       if (ways.includes(key)) return prev
-      return { ...prev, found: { ...prev.found, [id]: [...ways, key] } }
+      return { ...prev, [id]: [...ways, key] }
     })
 
   return { solved, found, recordSolution }
