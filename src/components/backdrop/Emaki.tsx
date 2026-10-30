@@ -1,58 +1,415 @@
-// Option 1, the scroll painting (emaki: a long painted scroll, unrolled
-// sideways as you read). A pale landscape is held behind the page below the
-// hero. As you scroll down, it slides sideways, nearer hills faster than far
-// ones, so the scene unrolls: mountains, then a lake, then hills with a
-// pagoda. The sky drifts from the hero's rose dawn toward dusk.
+// The scroll painting (emaki: a long painted scroll, unrolled sideways as
+// you read). A landscape is held behind the page below the hero. As you
+// scroll down it slides sideways, near things faster than far ones, so the
+// scene unrolls: snow peaks in alpine glow, a lake with a torii gate and a
+// boat, then hills with a pagoda and cherry trees in flower. The sky drifts
+// from the hero's rose dawn toward dusk.
 //
-// It's kept very pale, because it always sits behind text.
+// Three sheets, back to front, each its own <svg> so it can slide on its own:
+//   far   peaks and the distant range, birds
+//   mid   hills, the lake, the torii, the boat, the pagoda, cherry trees
+//   near  dark ink rocks along the bottom edge, with a cherry tree or two
 
-import { useEffect, useRef } from 'react'
-import { Fade, Pagoda } from '../hero/painting'
-import { heightAt, ridge, silhouette } from '../hero/ridge'
+import { useEffect, useRef, type JSX } from 'react'
+import { seededRandom } from '../../game/rng'
+import { Fade, InkedRidge, Pagoda } from '../hero/painting'
+import { heightAt, lineTo, ridge, silhouette, taper, type Point } from '../hero/ridge'
+import { blob } from '../hero/treeParts'
 
 const W = 4800
 const H = 1000
 
-const far = ridge(
+/* ---------- Far: peaks in alpine glow, the distant range, birds ---------- */
+
+const range = ridge(
   [
-    [-40, 640],
-    [400, 520],
-    [800, 600],
-    [1300, 470],
-    [1800, 590],
-    [2600, 610],
-    [3200, 520],
-    [3800, 600],
-    [4300, 540],
-    [4840, 610],
+    [-40, 660],
+    [400, 560],
+    [900, 620],
+    [1500, 540],
+    [2100, 640],
+    [2700, 600],
+    [3300, 540],
+    [3900, 610],
+    [4400, 560],
+    [4840, 630],
   ],
   0.16,
   91,
 )
-// Near hills on either side of the lake, dipping down into it.
-const nearLeft = ridge(
+
+type PeakSpot = { x: number; top: number; spread: number; seed: number }
+const peaks: PeakSpot[] = [
+  { x: 520, top: 400, spread: 420, seed: 1 },
+  { x: 1080, top: 470, spread: 330, seed: 2 },
+  { x: 3820, top: 430, spread: 400, seed: 3 },
+]
+
+/** A peak's outline, and its lit face: down the left ridge and back up a ragged line beside the summit. */
+function peakShape({ x, top, spread, seed }: PeakSpot) {
+  const left = ridge(
+    [
+      [x - spread, 680],
+      [x - spread * 0.45, 500],
+      [x, top],
+    ],
+    0.22,
+    seed * 10,
+  )
+  const right = ridge(
+    [
+      [x, top],
+      [x + spread * 0.5, 470],
+      [x + spread, 690],
+    ],
+    0.22,
+    seed * 10 + 1,
+  )
+  const outline = [...left, ...right.slice(1)]
+  const shadow = ridge(
+    [
+      [x, top],
+      [x - spread * 0.1, top + 120],
+      [x - spread * 0.25, top + 240],
+      [x - spread * 0.45, 640],
+    ],
+    0.3,
+    seed * 10 + 2,
+  )
+  const lit = `M${x} ${top}${lineTo([...left].reverse().slice(1))}${lineTo([...shadow].reverse())}Z`
+  return { outline, lit }
+}
+
+/** Birds far off, each a flick of the brush: x, y and size. */
+const birds = [
+  [700, 200, 1],
+  [760, 236, 0.75],
+  [810, 212, 0.6],
+  [2600, 260, 0.9],
+  [2660, 282, 0.7],
+  [4300, 230, 0.8],
+]
+
+function Far() {
+  return (
+    <>
+      <defs>
+        <Fade
+          id="ek-range"
+          y1={540}
+          y2={860}
+          stops={[
+            [0, 'var(--mtn-far)'],
+            [1, 'var(--mtn-far)', 0],
+          ]}
+        />
+        <Fade
+          id="ek-peak"
+          y1={300}
+          y2={760}
+          stops={[
+            [0, 'var(--mtn-snow)'],
+            [0.3, 'var(--mtn-peak)'],
+            [1, 'var(--mtn-far)', 0],
+          ]}
+        />
+        <Fade
+          id="ek-lit"
+          y1={300}
+          y2={700}
+          stops={[
+            [0, 'var(--glow-100)'],
+            [0.35, 'var(--glow-300)', 0.95],
+            [1, 'var(--sakura-100)', 0],
+          ]}
+        />
+        <Fade
+          id="ek-ink"
+          y1={300}
+          y2={680}
+          stops={[
+            [0, 'var(--ink-700)', 0.6],
+            [1, 'var(--ink-700)', 0],
+          ]}
+        />
+      </defs>
+      <g filter="url(#wash)">
+        {peaks.map((p, i) => {
+          const { outline, lit } = peakShape(p)
+          return (
+            <g key={i}>
+              <path d={silhouette(outline, H)} fill="url(#ek-peak)" />
+              <path d={lit} fill="url(#ek-lit)" filter="url(#glow-wash)" />
+              <InkedRidge id={`ek-peak-${i}`} points={outline} ink="url(#ek-ink)" width={30} />
+            </g>
+          )
+        })}
+        <path d={silhouette(range, H)} fill="url(#ek-range)" />
+      </g>
+      <g filter="url(#ink)" fill="none" strokeLinecap="round" style={{ stroke: 'var(--ink-700)' }}>
+        {birds.map(([x, y, s]) => (
+          <path
+            key={x}
+            d={`M${x - 14 * s} ${y + 3 * s}Q${x - 6 * s} ${y - 8 * s} ${x} ${y}Q${x + 6 * s} ${y - 8 * s} ${x + 14 * s} ${y + 3 * s}`}
+            strokeWidth={2.6}
+          />
+        ))}
+      </g>
+    </>
+  )
+}
+
+/* ---------- Mid: hills, the lake, the torii, the boat, the pagoda, cherry trees ---------- */
+
+const LAKE = 840
+const hillsLeft = ridge(
   [
-    [-40, 800],
-    [500, 720],
-    [1000, 790],
-    [1400, 900],
-    [1620, 1000],
+    [-40, 820],
+    [300, 730],
+    [700, 770],
+    [1050, 720],
+    [1400, 860],
+    [1560, LAKE + 30],
   ],
   0.22,
   92,
 )
-const nearRight = ridge(
+const hillsRight = ridge(
   [
-    [2850, 1000],
-    [3020, 880],
-    [3300, 740],
-    [3700, 700],
-    [4100, 760],
-    [4840, 780],
+    [2980, LAKE + 30],
+    [3150, 800],
+    [3400, 730],
+    [3700, 690],
+    [4050, 750],
+    [4400, 710],
+    [4840, 760],
   ],
   0.22,
   93,
 )
+const island = ridge(
+  [
+    [2120, LAKE + 4],
+    [2200, 818],
+    [2290, 810],
+    [2380, LAKE + 4],
+  ],
+  0.25,
+  94,
+)
+const ripples = [
+  [1700, 880, 160],
+  [2000, 905, 240],
+  [2500, 885, 200],
+  [1850, 940, 300],
+  [2650, 950, 180],
+  [2300, 975, 260],
+]
+
+/** A small cherry tree: a crooked trunk, a few limbs, and a crown of pink blots. */
+function CherryTree({ x, y, scale = 1, seed }: { x: number; y: number; scale?: number; seed: number }) {
+  const random = seededRandom(seed)
+  const s = scale
+  const trunk: Point[] = [
+    [x, y],
+    [x + 6 * s, y - 40 * s],
+    [x - 4 * s, y - 80 * s],
+    [x + 8 * s, y - 120 * s],
+  ]
+  const top = trunk[3]
+  const limbs = [-1, 0, 1].map((side) => {
+    const end: Point = [top[0] + side * (50 + random() * 30) * s, top[1] - (25 + random() * 35) * s]
+    return ridge([top, end], 0.2, seed + side + 5, 3)
+  })
+  const crown = [top, ...limbs.map((l) => l[l.length - 1])]
+  const dab = (key: string, d: string, tone: string, opacity: number) => (
+    <path key={key} d={d} opacity={opacity} style={{ fill: `var(${tone})`, mixBlendMode: 'multiply' }} />
+  )
+  return (
+    <g>
+      <g filter="url(#ink)" style={{ fill: 'var(--ink-900)' }} opacity={0.8}>
+        <path d={taper(trunk, 9 * s, 4 * s)} />
+        {limbs.map((l, i) => (
+          <path key={i} d={taper(l, 4 * s, 1)} />
+        ))}
+      </g>
+      <g filter="url(#bloom)">
+        {crown.flatMap(([cx, cy], i) => [
+          dab(`a${i}`, blob(cx, cy - 6 * s, 34 * s, random, 0.5, 0.75), '--sakura-100', 0.55),
+          dab(`b${i}`, blob(cx + 6 * s, cy, 20 * s, random, 0.5, 0.8), '--sakura-300', 0.6),
+          dab(`c${i}`, blob(cx - 8 * s, cy + 4 * s, 8 * s, random, 0.5, 0.8), '--sakura-500', 0.6),
+        ])}
+      </g>
+    </g>
+  )
+}
+
+/** A torii, the gate of a shrine: two posts, a beam across, and a curved lintel on top. */
+function Torii({ x, y, scale = 1 }: { x: number; y: number; scale?: number }) {
+  const s = scale
+  return (
+    <g filter="url(#ink)" style={{ fill: 'var(--seal-red)' }} opacity={0.85}>
+      <rect x={x - 38 * s} y={y - 92 * s} width={8 * s} height={92 * s} />
+      <rect x={x + 30 * s} y={y - 92 * s} width={8 * s} height={92 * s} />
+      <rect x={x - 48 * s} y={y - 76 * s} width={96 * s} height={7 * s} />
+      <rect x={x - 54 * s} y={y - 96 * s} width={108 * s} height={6 * s} />
+      <path
+        d={`M${x - 62 * s} ${y - 98 * s}Q${x} ${y - 90 * s} ${x + 62 * s} ${y - 98 * s}L${x + 58 * s} ${y - 108 * s}Q${x} ${y - 101 * s} ${x - 58 * s} ${y - 108 * s}Z`}
+        style={{ fill: 'var(--ink-900)' }}
+      />
+    </g>
+  )
+}
+
+/** A small boat with a figure and a pole, the way they sit in ink paintings of lakes. */
+function Boat({ x, y }: { x: number; y: number }) {
+  return (
+    <g filter="url(#ink)" style={{ fill: 'var(--ink-900)', stroke: 'var(--ink-900)' }} opacity={0.75}>
+      <path
+        d={`M${x - 46} ${y - 6}Q${x} ${y + 10} ${x + 52} ${y - 8}L${x + 44} ${y + 2}Q${x} ${y + 12} ${x - 38} ${y + 3}Z`}
+        stroke="none"
+      />
+      <path d={`M${x - 4} ${y - 4}L${x - 1} ${y - 26}L${x + 6} ${y - 26}L${x + 8} ${y - 4}Z`} stroke="none" />
+      <circle cx={x + 2} cy={y - 31} r={5} stroke="none" />
+      <path d={`M${x + 8} ${y - 22}L${x + 46} ${y - 64}`} strokeWidth={2} fill="none" />
+    </g>
+  )
+}
+
+function Mid() {
+  return (
+    <>
+      <defs>
+        <Fade
+          id="ek-hill"
+          y1={690}
+          y2={960}
+          stops={[
+            [0, 'var(--mtn-mid)'],
+            [1, 'var(--mtn-mid)', 0],
+          ]}
+        />
+        <Fade
+          id="ek-hill-ink"
+          y1={690}
+          y2={880}
+          stops={[
+            [0, 'var(--ink-700)', 0.55],
+            [1, 'var(--ink-700)', 0],
+          ]}
+        />
+        <Fade
+          id="ek-lake"
+          y1={LAKE}
+          y2={H}
+          stops={[
+            [0, 'var(--mist-teal)', 0.55],
+            [1, 'var(--mist-teal)', 0.15],
+          ]}
+        />
+        <Fade
+          id="ek-island"
+          y1={800}
+          y2={LAKE + 6}
+          stops={[
+            [0, 'var(--ink-700)', 0.8],
+            [1, 'var(--ink-500)', 0.4],
+          ]}
+        />
+      </defs>
+      <path d={`M1300 ${LAKE}H3150V${H}H1300Z`} fill="url(#ek-lake)" filter="url(#wash)" />
+      <g filter="url(#dry-brush)" strokeLinecap="round" style={{ stroke: 'var(--ink-300)' }}>
+        {ripples.map(([x, y, l]) => (
+          <path key={`${x},${y}`} d={`M${x} ${y}h${l}`} strokeWidth={2.4} opacity={0.8} />
+        ))}
+      </g>
+      <g filter="url(#wash)">
+        <path d={silhouette(island, LAKE + 8)} fill="url(#ek-island)" />
+      </g>
+      <CherryTree x={2250} y={812} scale={0.8} seed={61} />
+      <Torii x={1600} y={LAKE + 8} scale={1.1} />
+      <Boat x={2620} y={LAKE + 60} />
+
+      <g filter="url(#wash)">
+        <path d={silhouette(hillsLeft, H)} fill="url(#ek-hill)" />
+        <path d={silhouette(hillsRight, H)} fill="url(#ek-hill)" />
+        <InkedRidge id="ek-hills-left" points={hillsLeft} ink="url(#ek-hill-ink)" width={26} />
+        <InkedRidge id="ek-hills-right" points={hillsRight} ink="url(#ek-hill-ink)" width={26} />
+      </g>
+      <Pagoda id="ek-pagoda" x={3700} y={heightAt(hillsRight, 3700) + 8} scale={1.05} lanterns />
+      <CherryTree x={320} y={heightAt(hillsLeft, 320) + 6} seed={62} />
+      <CherryTree x={1050} y={heightAt(hillsLeft, 1050) + 6} scale={0.85} seed={63} />
+      <CherryTree x={3420} y={heightAt(hillsRight, 3420) + 6} scale={0.9} seed={64} />
+      <CherryTree x={4060} y={heightAt(hillsRight, 4060) + 6} seed={65} />
+      <CherryTree x={4450} y={heightAt(hillsRight, 4450) + 6} scale={0.8} seed={66} />
+    </>
+  )
+}
+
+/* ---------- Near: dark ink rocks at the bottom edge ---------- */
+
+const rocks = [
+  ridge(
+    [
+      [-40, 1000],
+      [60, 900],
+      [200, 870],
+      [340, 920],
+      [460, 1000],
+    ],
+    0.3,
+    95,
+  ),
+  ridge(
+    [
+      [2950, 1000],
+      [3080, 930],
+      [3220, 905],
+      [3360, 950],
+      [3480, 1000],
+    ],
+    0.3,
+    96,
+  ),
+  ridge(
+    [
+      [4380, 1000],
+      [4520, 910],
+      [4680, 890],
+      [4840, 940],
+    ],
+    0.3,
+    97,
+  ),
+]
+
+function Near() {
+  return (
+    <>
+      <defs>
+        <Fade
+          id="ek-rock"
+          y1={870}
+          y2={H}
+          stops={[
+            [0, 'var(--ink-700)', 0.85],
+            [1, 'var(--ink-500)', 0.3],
+          ]}
+        />
+      </defs>
+      <g filter="url(#wash)">
+        {rocks.map((r, i) => (
+          <g key={i}>
+            <path d={silhouette(r, H)} fill="url(#ek-rock)" />
+            <InkedRidge id={`ek-rock-${i}`} points={r} ink="var(--ink-900)" width={24} />
+          </g>
+        ))}
+      </g>
+      <CherryTree x={200} y={878} scale={1.25} seed={71} />
+      <CherryTree x={3230} y={912} scale={1.1} seed={72} />
+    </>
+  )
+}
 
 export function Emaki() {
   const stage = useRef<HTMLDivElement>(null)
@@ -81,51 +438,20 @@ export function Emaki() {
     }
   }, [])
 
+  const sheet = (name: string, content: JSX.Element) => (
+    <svg className={`emaki-layer emaki-${name}`} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMinYMax slice">
+      {content}
+    </svg>
+  )
+
   return (
     <div className="emaki" aria-hidden="true">
       <div className="emaki-stage" ref={stage}>
         <div className="emaki-dusk" />
-        <svg className="emaki-layer emaki-far" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMinYMax slice">
-          <defs>
-            <Fade
-              id="emaki-g-far"
-              y1={460}
-              y2={820}
-              stops={[
-                [0, 'var(--mtn-far)'],
-                [1, 'var(--mtn-far)', 0],
-              ]}
-            />
-          </defs>
-          <path d={silhouette(far, H)} fill="url(#emaki-g-far)" filter="url(#wash)" />
-        </svg>
-        <svg className="emaki-layer emaki-near" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMinYMax slice">
-          <defs>
-            <Fade
-              id="emaki-g-near"
-              y1={690}
-              y2={960}
-              stops={[
-                [0, 'var(--mtn-mid)'],
-                [1, 'var(--mtn-mid)', 0],
-              ]}
-            />
-            <Fade
-              id="emaki-g-lake"
-              y1={850}
-              y2={H}
-              stops={[
-                [0, 'var(--mist-teal)', 0.4],
-                [1, 'var(--mist-teal)', 0.1],
-              ]}
-            />
-          </defs>
-          {/* The lake, in the middle stretch of the scroll. */}
-          <path d={`M1300 860H3100V${H}H1300Z`} fill="url(#emaki-g-lake)" filter="url(#wash)" />
-          <path d={silhouette(nearLeft, H)} fill="url(#emaki-g-near)" filter="url(#wash)" />
-          <path d={silhouette(nearRight, H)} fill="url(#emaki-g-near)" filter="url(#wash)" />
-          <Pagoda id="emaki-pagoda" x={3700} y={heightAt(nearRight, 3700) + 8} scale={0.9} />
-        </svg>
+        {sheet('far', <Far />)}
+        <div className="emaki-mist" />
+        {sheet('mid', <Mid />)}
+        {sheet('near', <Near />)}
       </div>
     </div>
   )

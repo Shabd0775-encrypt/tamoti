@@ -9,8 +9,7 @@
 /* Mountain tones, mixed from the palette: paler and bluer with distance. Shared by every painted landscape. */
 .hero,
 .play-scenery,
-.emaki,
-.section-art {
+.emaki {
   --mtn-snow: color-mix(in oklab, var(--mist) 70%, var(--paper));
   /* The far ranges and hills take on a little of the rose light. */
   --mtn-far: color-mix(in oklab, var(--sakura-100) 30%, color-mix(in oklab, var(--mist-teal) 18%, var(--mist)));

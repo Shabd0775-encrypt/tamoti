@@ -8,7 +8,6 @@
 //   # E E B
 
 import type { CSSProperties } from 'react'
-import { SectionArt } from './backdrop/SectionArt'
 import { Seal } from './hero/Seal'
 import { Piece } from './Piece'
 
@@ -24,7 +23,6 @@ const demo = [
 export function HowToPlay() {
   return (
     <section className="howto" id="how-to-play" aria-labelledby="howto-title">
-      <SectionArt name="howto" />
       <div className="howto-text" data-reveal>
         <h2 id="howto-title">
           How to <em className="accent">play</em>

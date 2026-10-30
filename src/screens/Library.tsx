@@ -1,10 +1,7 @@
 // The library: pick a board size, see its pieces, choose a puzzle.
 
 import type { CSSProperties } from 'react'
-import { BackdropSwitcher } from '../components/backdrop/BackdropSwitcher'
-import { BackdropContext, useBackdropChoice } from '../components/backdrop/choice'
 import { Emaki } from '../components/backdrop/Emaki'
-import { SectionArt } from '../components/backdrop/SectionArt'
 import { BrushDivider } from '../components/BrushDivider'
 import { Footer } from '../components/Footer'
 import { Hero } from '../components/hero/Hero'
@@ -43,7 +40,6 @@ export function Library({ size, go, solved, found }: Props) {
   const next = puzzles.find((p) => !solved.has(puzzleId(size, p.number))) ?? puzzles[0]
   useReveal(size) // new boards appear when the size changes, so look again
   const dailyId = dailyPuzzleId()
-  const [backdrop, chooseBackdrop] = useBackdropChoice()
   const daily = findPuzzle(dailyId)!
 
   return (
@@ -59,9 +55,9 @@ export function Library({ size, go, solved, found }: Props) {
         }}
       />
 
-      <BackdropContext.Provider value={backdrop}>
+      <>
         <div className="library-rest">
-          {backdrop === 'emaki' && <Emaki />}
+          <Emaki />
           <div className="library-body">
             <HowToPlay />
 
@@ -89,7 +85,6 @@ export function Library({ size, go, solved, found }: Props) {
               aria-labelledby="piece-set-title"
               style={{ '--size': size } as CSSProperties}
             >
-              <SectionArt name="pieces" />
               <div className="section-head" data-reveal>
                 <h2 id="piece-set-title">
                   The <em className="accent">pieces</em> for {size}×{size}
@@ -114,7 +109,6 @@ export function Library({ size, go, solved, found }: Props) {
             <BrushDivider />
 
             <section className="puzzles" aria-labelledby="puzzles-title">
-              <SectionArt name="puzzles" />
               <div className="section-head" data-reveal>
                 <h2 id="puzzles-title">
                   The {puzzles.length} <em className="accent">boards</em>
@@ -172,10 +166,9 @@ export function Library({ size, go, solved, found }: Props) {
             </section>
           </div>
         </div>
-      </BackdropContext.Provider>
+      </>
 
       <Footer />
-      <BackdropSwitcher value={backdrop} onChoose={chooseBackdrop} />
     </main>
   )
 }
