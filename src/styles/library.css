@@ -333,6 +333,13 @@
   letter-spacing: 0.03em;
 }
 
+.puzzle-ways {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  letter-spacing: 0;
+}
+
 .puzzle-tile.is-solved .puzzle-number {
   color: var(--ink-900);
 }

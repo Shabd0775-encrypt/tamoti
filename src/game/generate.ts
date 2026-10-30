@@ -20,17 +20,77 @@ type Shape = [number, number]
  * keeping the ones that gave the most puzzles with only a few solutions.
  */
 export const pieceSets: Record<number, Shape[]> = {
-  5: [[1, 3], [1, 4], [1, 5], [2, 2], [2, 3]],
-  6: [[1, 3], [1, 4], [1, 5], [2, 2], [2, 4], [3, 3]],
-  7: [[1, 4], [1, 5], [1, 6], [1, 7], [2, 2], [2, 4], [3, 3]],
-  8: [[1, 4], [1, 5], [1, 6], [2, 2], [2, 4], [2, 5], [3, 3], [3, 4]],
-  9: [[1, 4], [1, 6], [1, 7], [1, 8], [2, 2], [2, 5], [3, 3], [3, 4], [3, 5]],
-  10: [[1, 5], [1, 6], [1, 7], [1, 9], [2, 2], [2, 5], [2, 8], [3, 3], [3, 4], [4, 4]],
+  5: [
+    [1, 3],
+    [1, 4],
+    [1, 5],
+    [2, 2],
+    [2, 3],
+  ],
+  6: [
+    [1, 3],
+    [1, 4],
+    [1, 5],
+    [2, 2],
+    [2, 4],
+    [3, 3],
+  ],
+  7: [
+    [1, 4],
+    [1, 5],
+    [1, 6],
+    [1, 7],
+    [2, 2],
+    [2, 4],
+    [3, 3],
+  ],
+  8: [
+    [1, 4],
+    [1, 5],
+    [1, 6],
+    [2, 2],
+    [2, 4],
+    [2, 5],
+    [3, 3],
+    [3, 4],
+  ],
+  9: [
+    [1, 4],
+    [1, 6],
+    [1, 7],
+    [1, 8],
+    [2, 2],
+    [2, 5],
+    [3, 3],
+    [3, 4],
+    [3, 5],
+  ],
+  10: [
+    [1, 5],
+    [1, 6],
+    [1, 7],
+    [1, 9],
+    [2, 2],
+    [2, 5],
+    [2, 8],
+    [3, 3],
+    [3, 4],
+    [4, 4],
+  ],
 }
 
 /** Blockers: small boards get two, bigger boards three. */
 export function blockerShapes(size: number): Shape[] {
-  return size <= 6 ? [[1, 1], [1, 2]] : [[1, 1], [1, 2], [1, 3]]
+  return size <= 6
+    ? [
+        [1, 1],
+        [1, 2],
+      ]
+    : [
+        [1, 1],
+        [1, 2],
+        [1, 3],
+      ]
 }
 
 /** The pieces for a board size, biggest first, lettered A, B, C... Each starts lying flat. */
@@ -89,7 +149,10 @@ export type Rated = {
 
 /** Counts solutions and rates difficulty. Returns null for layouts with too many solutions. */
 export function rate(size: number, blocked: Rect[], maxSolutions: number): Rated | null {
-  const result = solve({ size, blocked, pieces: piecesFor(size) }, { maxSolutions: maxSolutions + 1, maxSteps: 2_000_000 })
+  const result = solve(
+    { size, blocked, pieces: piecesFor(size) },
+    { maxSolutions: maxSolutions + 1, maxSteps: 2_000_000 },
+  )
   if (!result.finished || result.solutions === 0 || result.solutions > maxSolutions) return null
   return { blocked, solutions: result.solutions, difficulty: Math.log2(result.steps + 1) - Math.log2(result.solutions) }
 }

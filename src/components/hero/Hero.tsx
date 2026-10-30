@@ -20,6 +20,8 @@ type Props = {
   next: { number: number; blocked: Rect[]; tier: string }
   /** Open that puzzle. `from` is the painted board, which flows into the play screen's board. */
   onBegin: (from: Element | null) => void
+  /** Today's board, the same for everyone. */
+  daily: { label: string; onOpen: () => void }
 }
 
 /**
@@ -55,7 +57,7 @@ function useParallax(root: RefObject<HTMLElement | null>) {
   }, [root])
 }
 
-export function Hero({ size, next, onBegin }: Props) {
+export function Hero({ size, next, onBegin, daily }: Props) {
   const root = useRef<HTMLElement>(null)
   const preview = useRef<SVGSVGElement>(null)
   useParallax(root)
@@ -91,9 +93,14 @@ export function Hero({ size, next, onBegin }: Props) {
         />
         <div className="hero-actions">
           <BrushButton onClick={() => onBegin(preview.current)}>Begin {label}</BrushButton>
-          <a className="hero-more" href="#boards">
-            or choose a board
-          </a>
+          <div className="hero-links">
+            <a className="hero-more" href="#boards">
+              or choose a board
+            </a>
+            <button type="button" className="hero-more" onClick={daily.onOpen}>
+              today's board, {daily.label}
+            </button>
+          </div>
         </div>
       </div>
 

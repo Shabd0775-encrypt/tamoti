@@ -9,8 +9,10 @@ import { PaintedBoard } from '../components/PaintedBoard'
 import { Piece } from '../components/Piece'
 import { SizePicker } from '../components/SizePicker'
 import { toneFor } from '../components/tone'
-import { library, puzzleId, sizes, tierNames, type Tier } from '../game/library'
+import { dailyPuzzleId } from '../game/daily'
+import { findPuzzle, library, puzzleId, sizes, tierNames, type Tier } from '../game/library'
 import { useReveal } from '../hooks/useReveal'
+import type { Found } from '../state/progress'
 import type { Go } from '../state/route'
 
 const tierNotes: Record<Tier, string> = {
@@ -24,14 +26,18 @@ type Props = {
   size: number
   go: Go
   solved: Set<string>
+  /** The ways found for each puzzle. */
+  found: Found
 }
 
-export function Library({ size, go, solved }: Props) {
+export function Library({ size, go, solved, found }: Props) {
   const { pieces, puzzles } = library.sizes[size]
   const solvedHere = puzzles.filter((p) => solved.has(puzzleId(size, p.number))).length
   const tiers = Object.keys(tierNames) as Tier[]
   const next = puzzles.find((p) => !solved.has(puzzleId(size, p.number))) ?? puzzles[0]
   useReveal(size) // new boards appear when the size changes, so look again
+  const dailyId = dailyPuzzleId()
+  const daily = findPuzzle(dailyId)!
 
   return (
     <main className="library">
@@ -39,6 +45,10 @@ export function Library({ size, go, solved }: Props) {
         size={size}
         next={{ number: next.number, blocked: next.blocked, tier: tierNames[next.tier] }}
         onBegin={(from) => go({ screen: 'play', id: puzzleId(size, next.number) }, from)}
+        daily={{
+          label: `${daily.size}×${daily.size}, No. ${daily.number}`,
+          onOpen: () => go({ screen: 'play', id: dailyId }),
+        }}
       />
 
       <div className="library-body">
@@ -120,7 +130,14 @@ export function Library({ size, go, solved }: Props) {
                             <PaintedBoard size={size} blocked={p.blocked} />
                             {isSolved && <Seal className="tile-seal" />}
                           </span>
-                          <span className="puzzle-number">No. {p.number}</span>
+                          <span className="puzzle-number">
+                            No. {p.number}
+                            {(found[id]?.length ?? 0) > 0 && p.solutions > 1 && (
+                              <span className="puzzle-ways">
+                                {found[id].length} of {p.solutions} ways
+                              </span>
+                            )}
+                          </span>
                         </button>
                       </li>
                     )

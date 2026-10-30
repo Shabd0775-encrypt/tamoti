@@ -6,7 +6,7 @@ import { useRoute } from './state/route'
 
 export default function App() {
   const [route, go] = useRoute()
-  const { solved, markSolved } = useProgress()
+  const { solved, found, recordSolution } = useProgress()
 
   return (
     <>
@@ -14,9 +14,9 @@ export default function App() {
       <WashFilters />
       {route.screen === 'play' ? (
         // `key` gives each puzzle a fresh Play screen, so nothing carries over between puzzles.
-        <Play key={route.id} id={route.id} go={go} onSolved={markSolved} />
+        <Play key={route.id} id={route.id} go={go} found={found[route.id] ?? []} onSolved={recordSolution} />
       ) : (
-        <Library size={route.size} go={go} solved={solved} />
+        <Library size={route.size} go={go} solved={solved} found={found} />
       )}
     </>
   )

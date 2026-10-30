@@ -7,7 +7,10 @@ import type { Piece, Placements, Puzzle, Rect } from './types'
 
 /** Turns a drawing into a puzzle, plus the solution it was drawn from. */
 export function parseLayout(art: string): { puzzle: Puzzle; solution: Placements } {
-  const rows = art.trim().split('\n').map((line) => line.trim())
+  const rows = art
+    .trim()
+    .split('\n')
+    .map((line) => line.trim())
   const size = rows.length
 
   // Find the bounding box and cell count of every symbol.

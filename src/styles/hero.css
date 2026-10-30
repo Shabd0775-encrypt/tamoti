@@ -297,6 +297,21 @@
     text-decoration-color 400ms var(--ease-out);
 }
 
+/* The two quieter ways in, one under the other. */
+.hero-links {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+}
+
+button.hero-more {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+}
+
 .hero-more:hover {
   color: var(--ink-900);
   text-decoration-color: var(--sakura-500);

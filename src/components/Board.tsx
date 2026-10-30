@@ -15,6 +15,10 @@ type Props = {
   onRotate: (pieceId: string) => void
   /** Once solved, the red seal is stamped in the corner. */
   solved: boolean
+  /** A piece a hint just placed, which glows softly as it settles. */
+  hinted?: string | null
+  /** A piece a hint has marked as being in the way. */
+  flagged?: string | null
 }
 
 /**
@@ -50,7 +54,7 @@ function BoardRules({ size }: { size: number }) {
 const spot = (row: number, col: number, w: number, h: number) =>
   ({ '--r': row, '--c': col, '--w': w, '--h': h }) as CSSProperties
 
-export function Board({ ref, state, liftedId, target, onPiecePointerDown, onRotate, solved }: Props) {
+export function Board({ ref, state, liftedId, target, onPiecePointerDown, onRotate, solved, hinted, flagged }: Props) {
   const { puzzle, placements } = state
   const dragged = puzzle.pieces.find((p) => p.id === liftedId)
   const ghost = target && dragged && { ...target, ...footprint(dragged, target.rotated) }
@@ -74,6 +78,8 @@ export function Board({ ref, state, liftedId, target, onPiecePointerDown, onRota
             'on-board',
             pieceId === liftedId && 'is-lifted',
             clash.onTop.has(pieceId) && 'is-overlapping',
+            pieceId === hinted && 'is-hinted',
+            pieceId === flagged && 'is-flagged',
           ]
           return (
             <Piece
