@@ -49,6 +49,17 @@ h2 {
   text-wrap: balance;
 }
 
+/* Links to a section glide there, and stop just below the menu bar. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+[id] {
+  scroll-margin-top: 72px;
+}
+
 ::selection {
   background: var(--sakura-100);
   color: var(--ink-900);

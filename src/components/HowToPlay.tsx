@@ -22,7 +22,7 @@ const demo = [
 
 export function HowToPlay() {
   return (
-    <section className="howto" aria-labelledby="howto-title">
+    <section className="howto" id="how-to-play" aria-labelledby="howto-title">
       <div className="howto-text" data-reveal>
         <h2 id="howto-title">
           How to <em className="accent">play</em>

@@ -1,5 +1,75 @@
 /* The library below the hero, section by section. */
 
+/* ---------- The menu along the top ---------- */
+
+.site-nav {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 40;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px clamp(16px, 4vw, 48px);
+  transition:
+    background-color 500ms var(--ease-out),
+    box-shadow 500ms var(--ease-out);
+}
+
+/* Past the top of the painting: a paper background, so the links stay readable over the page. */
+.site-nav.is-scrolled {
+  background: color-mix(in oklab, var(--paper) 94%, transparent);
+  box-shadow: 0 10px 24px -20px color-mix(in oklab, var(--ink-900) 40%, transparent);
+}
+
+.site-nav-mark {
+  color: var(--ink-900);
+  font-family: var(--font-brand);
+  font-size: 1.625rem;
+  line-height: 1;
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity 500ms var(--ease-out);
+}
+
+.site-nav.is-scrolled .site-nav-mark {
+  opacity: 1;
+}
+
+.site-nav ul {
+  display: flex;
+  gap: clamp(18px, 2.4vw, 32px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-nav ul a {
+  display: inline-block;
+  padding: 6px 0;
+  color: var(--ink-700);
+  font-size: 0.9375rem;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 7px;
+  transition:
+    color 400ms var(--ease-out),
+    text-decoration-color 400ms var(--ease-out);
+}
+
+.site-nav ul a:hover,
+.site-nav ul a:focus-visible {
+  color: var(--ink-900);
+  text-decoration-color: var(--sakura-300);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-nav,
+  .site-nav-mark {
+    transition: none;
+  }
+}
+
 /* ---------- Choose a board ---------- */
 
 .size-picker {

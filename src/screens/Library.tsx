@@ -5,6 +5,7 @@ import { BrushDivider } from '../components/BrushDivider'
 import { Footer } from '../components/Footer'
 import { Hero } from '../components/hero/Hero'
 import { HowToPlay } from '../components/HowToPlay'
+import { SiteNav } from '../components/SiteNav'
 import { Seal } from '../components/hero/Seal'
 import { PaintedBoard } from '../components/PaintedBoard'
 import { Piece } from '../components/Piece'
@@ -42,6 +43,7 @@ export function Library({ size, go, solved, found }: Props) {
 
   return (
     <main className="library">
+      <SiteNav />
       <Hero
         size={size}
         next={{ number: next.number, blocked: next.blocked, tier: tierNames[next.tier] }}
