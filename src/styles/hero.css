@@ -262,11 +262,16 @@
   inset: -4px -8px;
   width: calc(100% + 16px);
   height: calc(100% + 8px);
-  fill: var(--ink-900);
+  fill: var(--ink-800);
   transform-origin: 40% 50%;
   transition:
     transform 800ms var(--ease-out),
     opacity 800ms var(--ease-out);
+}
+
+/* The dry tail flicking off the end of the stroke holds less ink. */
+.brush-tail {
+  opacity: 0.7;
 }
 
 .brush-button span {
@@ -473,4 +478,5 @@ button.hero-more {
     transform: none;
   }
 }
+
 
