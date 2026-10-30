@@ -77,7 +77,7 @@ export function Library({ size, go, solved, found }: Props) {
         <section className="piece-set" aria-labelledby="piece-set-title" style={{ '--size': size } as CSSProperties}>
           <div className="section-head" data-reveal>
             <h2 id="piece-set-title">
-              The pieces for {size}×{size}
+              The <em className="accent">pieces</em> for {size}×{size}
             </h2>
             <p>
               Every {size}×{size} board is filled with these {pieces.length}. No two are the same shape, and the dark
@@ -100,7 +100,9 @@ export function Library({ size, go, solved, found }: Props) {
 
         <section className="puzzles" aria-labelledby="puzzles-title">
           <div className="section-head" data-reveal>
-            <h2 id="puzzles-title">The {puzzles.length} boards</h2>
+            <h2 id="puzzles-title">
+              The {puzzles.length} <em className="accent">boards</em>
+            </h2>
             <p>
               {solvedHere === 0
                 ? 'From gentle to deep. Start anywhere; nothing is locked.'

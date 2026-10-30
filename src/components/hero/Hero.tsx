@@ -81,8 +81,8 @@ export function Hero({ size, next, onBegin, daily }: Props) {
           <Seal className="hero-seal" />
         </div>
         <p className="hero-lede">
-          Fill every open square with the pieces you are given. No timer, no score. Only a quiet board, for as long as
-          you like.
+          Fill every open square with the pieces you are given. <mark className="highlight">No timer, no score.</mark>{' '}
+          Only a quiet board, for as long as you like.
         </p>
         <BoardPreview
           size={size}

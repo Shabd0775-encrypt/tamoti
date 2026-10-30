@@ -24,7 +24,9 @@ export function HowToPlay() {
   return (
     <section className="howto" aria-labelledby="howto-title">
       <div className="howto-text" data-reveal>
-        <h2 id="howto-title">How to play</h2>
+        <h2 id="howto-title">
+          How to <em className="accent">play</em>
+        </h2>
         <ol className="howto-steps">
           <li>
             <strong>Drag</strong> a piece onto the board.

@@ -8,7 +8,6 @@ import { Piece } from '../components/Piece'
 import { PlayScenery, SolveGust } from '../components/PlayScenery'
 import { SolutionThumb } from '../components/SolutionThumb'
 import { toneFor } from '../components/tone'
-import { SoundSampler } from '../components/SoundSampler'
 import { Tray } from '../components/Tray'
 import { canPlace, clashes, footprint, isSolved, onBoard, turnInPlace } from '../game/board'
 import { dailyPuzzleId } from '../game/daily'
@@ -45,10 +44,7 @@ export function Play({ id, go, found, onSolved }: Props) {
   const dispatch: Dispatch<GameAction> = (action) => {
     rawDispatch(action)
     if (!soundOn) return
-    if (action.type === 'place') {
-      const piece = puzzle.pieces.find((p) => p.id === action.pieceId)
-      play('place', piece ? piece.w * piece.h : undefined)
-    }
+    if (action.type === 'place') play('place')
     if (action.type === 'rotate') play('turn')
   }
   const boardRef = useRef<HTMLDivElement>(null)
@@ -242,7 +238,9 @@ export function Play({ id, go, found, onSolved }: Props) {
           <p className="status" aria-live="polite">
             {solved ? (
               <>
-                <strong>Every square is filled.</strong>
+                <strong>
+                  Every square is <mark className="highlight">filled</mark>.
+                </strong>
                 {ways === 1
                   ? 'This board has only one solution, and you found it.'
                   : foundCount >= ways
@@ -253,17 +251,23 @@ export function Play({ id, go, found, onSolved }: Props) {
               </>
             ) : hintNow?.kind === 'rethink' ? (
               <>
-                <strong>This one is in the way</strong>
+                <strong>
+                  This one is <em className="accent">in the way</em>
+                </strong>
                 Where it sits now, the marked piece can't be part of any solution. Try it somewhere else.
               </>
             ) : hintNow?.kind === 'place' ? (
               <>
-                <strong>One piece, placed for you</strong>
+                <strong>
+                  One piece, <em className="accent">placed for you</em>
+                </strong>
                 It fits with everything you've put down so far. Move it if you'd rather.
               </>
             ) : overlapping && piecesLeft === 0 ? (
               <>
-                <strong>Some pieces overlap</strong>
+                <strong>
+                  Some pieces <em className="accent">overlap</em>
+                </strong>
                 That's fine while you try things. Slide them apart to finish.
               </>
             ) : (
@@ -342,7 +346,6 @@ export function Play({ id, go, found, onSolved }: Props) {
         />
       )}
       <SolveGust gust={gusts} />
-      <SoundSampler soundOn={soundOn} />
     </main>
   )
 }

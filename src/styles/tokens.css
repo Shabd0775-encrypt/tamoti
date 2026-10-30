@@ -77,7 +77,42 @@
   --settle: 220ms;
   --reveal: 900ms;
 
-  /* Type: a brush-like mincho for display, a soft gothic for reading */
-  --font-display: 'Shippori Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+  /*
+    Type. Display: headings and the name. Accent: the italic for a word picked
+    out in a heading, and for highlighted words. Japanese: the seal and the
+    calligraphy, always Shippori Mincho. UI: everything you read.
+    The display face is being chosen (see FontSwitcher.tsx); this is option 1.
+  */
+  --font-japanese: 'Shippori Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+  --font-display: var(--font-japanese);
+  --font-accent: 'Cormorant Garamond', 'Times New Roman', serif;
+  --display-tracking: 0.04em;
+  /* Cormorant's letters are small for their size, so its accent words are set a little larger. */
+  --accent-scale: 1.12;
   --font-ui: 'Zen Kaku Gothic New', 'Hiragino Sans', system-ui, sans-serif;
+}
+
+/* The other display faces on trial, each with its own true italic. */
+:root[data-font='cormorant'] {
+  --font-display: 'Cormorant Garamond', 'Times New Roman', serif;
+  --font-accent: 'Cormorant Garamond', 'Times New Roman', serif;
+  --display-tracking: 0.01em;
+  /* Its lowercase letters are short; this sets them to the same height as the others'. */
+  --display-adjust: 0.47;
+  --accent-scale: 1;
+}
+
+:root[data-font='instrument'] {
+  --font-display: 'Instrument Serif', 'Times New Roman', serif;
+  --font-accent: 'Instrument Serif', 'Times New Roman', serif;
+  --display-tracking: -0.005em;
+  --display-adjust: 0.5;
+  --accent-scale: 1;
+}
+
+:root[data-font='dmserif'] {
+  --font-display: 'DM Serif Display', 'Times New Roman', serif;
+  --font-accent: 'DM Serif Display', 'Times New Roman', serif;
+  --display-tracking: -0.01em;
+  --accent-scale: 1;
 }

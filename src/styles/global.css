@@ -59,6 +59,36 @@ h2 {
   box-shadow: 0 0 0 7px color-mix(in oklab, var(--ink-700) 12%, transparent);
 }
 
+/*
+  Picking out words, the way an editorial page does:
+  - .accent: one word of a heading in italic, in deep pink;
+  - .highlight: a few words set in a solid block of deep pink, used sparingly.
+  Deep pink (sakura-700) is the one pink that reads clearly against the paper,
+  both as text on paper and as paper-colored text on it.
+*/
+.accent {
+  color: var(--sakura-700);
+  font-family: var(--font-accent);
+  font-size: calc(var(--accent-scale) * 1em);
+  font-size-adjust: var(--display-adjust, none);
+  font-style: italic;
+  font-weight: inherit;
+  letter-spacing: 0;
+}
+
+.highlight {
+  padding: 0.02em 0.26em 0.08em;
+  border-radius: 3px 2px 4px 2px;
+  background: var(--sakura-700);
+  color: var(--paper);
+  font-family: var(--font-accent);
+  font-size: calc(var(--accent-scale) * 1em);
+  font-style: italic;
+  /* If the words wrap onto a second line, each line gets its own block. */
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
 /* Read aloud by screen readers, but not shown. */
 .visually-hidden {
   position: absolute;
@@ -132,3 +162,42 @@ button {
 }
 
 /* The play screen is in play.css. */
+
+/* TEMPORARY: the typeface switcher. Delete with FontSwitcher.tsx. */
+.font-switcher {
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  z-index: 30;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  max-width: calc(100% - 24px);
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--paper);
+  box-shadow: 0 6px 20px -10px color-mix(in oklab, var(--ink-900) 50%, transparent);
+  translate: -50% 0;
+}
+
+.switcher-label {
+  margin-right: 6px;
+  color: var(--ink-700);
+  font-size: 0.8125rem;
+}
+
+.font-switcher button {
+  padding: 3px 10px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--ink-700);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+
+.font-switcher button[aria-pressed='true'] {
+  background: var(--ink-900);
+  color: var(--paper);
+}

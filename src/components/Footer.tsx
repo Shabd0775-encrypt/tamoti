@@ -40,7 +40,7 @@ export function Footer() {
           <Seal className="footer-seal" />
         </p>
         <p className="footer-line" data-reveal style={{ '--d': '120ms' } as CSSProperties}>
-          A quiet puzzle to come back to. No timer, no score, nothing to lose.
+          A quiet puzzle to come back to. No timer, no score, <em className="accent">nothing to lose</em>.
         </p>
         <a className="footer-top" href="#top" data-reveal style={{ '--d': '220ms' } as CSSProperties}>
           Back to the top

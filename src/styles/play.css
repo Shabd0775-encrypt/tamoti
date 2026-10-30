@@ -74,10 +74,11 @@
   margin: 0;
   color: var(--ink-900);
   font-family: var(--font-display);
+  font-size-adjust: var(--display-adjust, none);
   font-size: clamp(1.75rem, 3vw, 2.25rem);
   font-weight: 400;
   line-height: 1.2;
-  letter-spacing: 0.04em;
+  letter-spacing: var(--display-tracking);
   font-variant-numeric: tabular-nums;
 }
 
@@ -100,8 +101,9 @@
   margin-left: auto;
   color: var(--ink-700);
   font-family: var(--font-display);
+  font-size-adjust: var(--display-adjust, none);
   font-size: 1.0625rem;
-  letter-spacing: 0.04em;
+  letter-spacing: var(--display-tracking);
 }
 
 /* Sound, off unless asked for: a quiet word at the end of the bar. */
@@ -428,9 +430,10 @@ html.is-dragging body {
   margin-bottom: 4px;
   color: var(--ink-900);
   font-family: var(--font-display);
+  font-size-adjust: var(--display-adjust, none);
   font-size: 1.375rem;
   font-weight: 400;
-  letter-spacing: 0.03em;
+  letter-spacing: var(--display-tracking);
 }
 
 /* Keyboard tips only make sense where there's a mouse (and so likely a keyboard)… */
@@ -489,9 +492,10 @@ html.is-dragging body {
   margin: 0 0 12px;
   color: var(--ink-900);
   font-family: var(--font-display);
+  font-size-adjust: var(--display-adjust, none);
   font-size: 1.0625rem;
   font-weight: 400;
-  letter-spacing: 0.03em;
+  letter-spacing: var(--display-tracking);
 }
 
 .ways ul {
@@ -590,54 +594,4 @@ html.is-dragging body {
   .board-seal {
     animation-name: fade-in;
   }
-}
-
-/* TEMPORARY: the placing-sound sampler. Delete with SoundSampler.tsx. */
-.sound-sampler {
-  position: fixed;
-  left: 50%;
-  bottom: 16px;
-  z-index: 20;
-  display: grid;
-  gap: 2px;
-  max-width: calc(100% - 24px);
-  padding: 8px 10px;
-  border-radius: 14px;
-  background: var(--paper);
-  box-shadow: 0 6px 20px -10px color-mix(in oklab, var(--ink-900) 50%, transparent);
-  translate: -50% 0;
-}
-
-.sound-sampler [role='group'] {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 2px;
-}
-
-.sampler-label {
-  margin-right: 6px;
-  color: var(--ink-700);
-  font-size: 0.8125rem;
-}
-
-.sound-sampler button {
-  padding: 3px 10px;
-  border: 0;
-  border-radius: 999px;
-  background: none;
-  color: var(--ink-700);
-  font-size: 0.8125rem;
-  line-height: 1.6;
-}
-
-.sound-sampler button[aria-pressed='true'] {
-  background: var(--ink-900);
-  color: var(--paper);
-}
-
-.sampler-note {
-  margin: 2px 0 0;
-  color: var(--ink-700);
-  font-size: 0.75rem;
 }

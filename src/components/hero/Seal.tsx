@@ -16,7 +16,7 @@ export function Seal({ className = '' }: { className?: string }) {
           textAnchor="middle"
           fontSize="35"
           fontWeight="700"
-          style={{ fill: 'var(--paper)', fontFamily: 'var(--font-display)' }}
+          style={{ fill: 'var(--paper)', fontFamily: 'var(--font-japanese)' }}
         >
           桜
         </text>

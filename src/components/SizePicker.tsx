@@ -35,7 +35,9 @@ export function SizePicker({ sizes, current, progress, onChoose }: Props) {
   return (
     <section className="size-picker" id="boards" aria-labelledby="boards-title">
       <div className="size-picker-intro" data-reveal>
-        <h2 id="boards-title">Choose a board</h2>
+        <h2 id="boards-title">
+          Choose a <em className="accent">board</em>
+        </h2>
         <p>Six sizes, from a few quiet minutes at 5×5 to a long, slow sit with 10×10.</p>
       </div>
 
