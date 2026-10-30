@@ -34,7 +34,7 @@ export function Library({ size, go, solved }: Props) {
       <Hero
         size={size}
         next={{ number: next.number, blocked: next.blocked, tier: tierNames[next.tier] }}
-        onBegin={() => go({ screen: 'play', id: puzzleId(size, next.number) })}
+        onBegin={(from) => go({ screen: 'play', id: puzzleId(size, next.number) }, from)}
       />
 
       <div className="library-body">
@@ -92,7 +92,9 @@ export function Library({ size, go, solved }: Props) {
                       <button
                         type="button"
                         className={`puzzle-tile ${isSolved ? 'is-solved' : ''}`}
-                        onClick={() => go({ screen: 'play', id })}
+                        onClick={(event) =>
+                          go({ screen: 'play', id }, event.currentTarget.querySelector('.mini-board'))
+                        }
                         aria-label={`Puzzle ${p.number}, ${tierNames[tier]}${isSolved ? ', solved' : ''}`}
                       >
                         <MiniBoard size={size} blocked={p.blocked} />

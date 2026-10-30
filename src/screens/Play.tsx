@@ -2,8 +2,11 @@
 
 import { useEffect, useReducer, useRef, type CSSProperties } from 'react'
 import { Board } from '../components/Board'
+import { BrushButton } from '../components/BrushButton'
 import { Icon } from '../components/Icon'
 import { Piece } from '../components/Piece'
+import { LookSwitcher } from '../components/LookSwitcher'
+import { PlayScenery } from '../components/PlayScenery'
 import { toneFor } from '../components/tone'
 import { Tray } from '../components/Tray'
 import { clashes, footprint, isSolved } from '../game/board'
@@ -50,6 +53,7 @@ export function Play({ id, go, onSolved }: Props) {
 
   return (
     <main className="play" style={{ '--size': puzzle.size } as CSSProperties}>
+      <PlayScenery />
       <header className="play-bar">
         <button type="button" className="back" onClick={() => go({ screen: 'library', size: entry.size })}>
           <Icon name="back" />
@@ -69,6 +73,7 @@ export function Play({ id, go, onSolved }: Props) {
           target={target}
           onPiecePointerDown={startDrag}
           onRotate={rotate}
+          solved={solved}
         />
 
         <aside>
@@ -101,10 +106,7 @@ export function Play({ id, go, onSolved }: Props) {
 
           <div className="actions">
             {solved && nextId ? (
-              <button type="button" className="primary" onClick={() => go({ screen: 'play', id: nextId })}>
-                Next puzzle
-                <Icon name="next" />
-              </button>
+              <BrushButton onClick={() => go({ screen: 'play', id: nextId })}>Next puzzle</BrushButton>
             ) : (
               <button type="button" onClick={() => dispatch({ type: 'undo' })} disabled={state.history.length === 0}>
                 Undo
@@ -135,6 +137,7 @@ export function Play({ id, go, onSolved }: Props) {
           }}
         />
       )}
+      <LookSwitcher />
     </main>
   )
 }

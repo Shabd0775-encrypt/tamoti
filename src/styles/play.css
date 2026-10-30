@@ -1,0 +1,616 @@
+/*
+  The play screen, painted like the library: paper, a faint landscape behind,
+  a board with a hand-ruled ink grid, and pieces like tiles of watercolor.
+  The pieces' look also applies wherever a piece is shown (the library's piece set).
+*/
+
+.play {
+  /* The board is as big as the screen allows. Cell sizes follow from it. */
+  --board-size: min(100vw - 52px, 64dvh, 580px);
+  --cell-size: calc(var(--board-size) / var(--size));
+  --tray-cell: min(calc(var(--cell-size) * 0.6), 34px);
+
+  position: relative;
+  isolation: isolate;
+  min-height: 100dvh;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+
+/* ---------- The painting behind ---------- */
+
+.play-scenery {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: linear-gradient(to bottom, color-mix(in oklab, var(--glow-100) 60%, var(--paper)) 0%, var(--paper) 55%);
+}
+
+/* The range sits low and faded, so it reads as distance, never as clutter behind the pieces. */
+.play-range {
+  position: absolute;
+  left: 50%;
+  bottom: -14vh;
+  width: max(100vw, 160vh);
+  aspect-ratio: 1600 / 1000;
+  opacity: 0.42;
+  translate: -50% 0;
+}
+
+.play-scenery::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 30%;
+  background: linear-gradient(to bottom, transparent, var(--paper) 80%);
+}
+
+.play-scenery .petals {
+  z-index: 1;
+}
+
+/* ---------- The bar along the top ---------- */
+
+.play-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 24px;
+  margin-bottom: 28px;
+}
+
+.play-bar h1 {
+  margin: 0;
+  color: var(--ink-900);
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.play-number {
+  color: var(--ink-700);
+}
+
+.play-tier {
+  margin-left: auto;
+  color: var(--ink-700);
+  font-family: var(--font-display);
+  font-size: 1.0625rem;
+  letter-spacing: 0.04em;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  gap: 4px;
+  margin-left: -8px;
+  padding: 6px 12px 6px 6px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-700);
+  transition: color 400ms var(--ease-out);
+}
+
+.back:hover {
+  color: var(--ink-900);
+}
+
+.play-area {
+  display: grid;
+  gap: 28px;
+  justify-content: center;
+}
+
+@media (min-width: 900px) {
+  .play-area {
+    grid-template-columns: auto minmax(260px, 340px);
+    align-items: start;
+    gap: 56px;
+  }
+}
+
+/* ---------- The board ---------- */
+
+.board {
+  position: relative;
+  width: fit-content;
+  padding: 12px;
+  /* This name pairs it with the small board that was pressed: the browser glides one into the other. */
+  view-transition-name: puzzle-board;
+}
+
+.board-grid {
+  position: relative;
+  width: var(--board-size);
+  aspect-ratio: 1;
+  touch-action: none;
+}
+
+/* The sheet, drawn in SVG, filling the board including its paper margin. */
+.board-paint {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* The grid lines, exactly over the playing area. */
+.board-rules {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.board-rules path {
+  fill: none;
+  stroke: color-mix(in oklab, var(--ink-300) 75%, transparent);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.board-paint .board-sheet {
+  fill: var(--paper-warm);
+}
+
+.board-paint .board-edge {
+  fill: none;
+  stroke: var(--ink-900);
+  stroke-width: 2;
+  opacity: 0.75;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Blocked squares: pools of dark ink, with fine pale hatching so they never read as a piece.
+   They sit in their squares exactly as pieces do, with the same gap. */
+.blocked {
+  padding: var(--piece-gap);
+}
+
+.blocked::before {
+  content: '';
+  display: block;
+  height: 100%;
+  border-radius: 5px 7px 4px 6px / 6px 4px 7px 5px;
+  background:
+    repeating-linear-gradient(-45deg, transparent 0 6px, color-mix(in oklab, var(--paper) 16%, transparent) 6px 7px),
+    var(--ink-700);
+  box-shadow:
+    inset 0 0 0 1.5px color-mix(in oklab, var(--ink-900) 70%, transparent),
+    inset 0 0 12px color-mix(in oklab, var(--ink-900) 50%, transparent);
+}
+
+/* Where the dragged piece would land: a pale wash, pink if it would overlap. */
+.ghost {
+  padding: var(--piece-gap);
+  pointer-events: none;
+}
+
+.ghost::before {
+  content: '';
+  display: block;
+  height: 100%;
+  border-radius: 6px 8px 5px 7px / 7px 5px 8px 6px;
+  background: var(--ghost-fits);
+}
+
+.ghost.is-overlapping::before {
+  background: var(--overlap);
+}
+
+/*
+  Overlaps are allowed while playing, and never scolded. Where pieces overlap
+  they glaze: the piece on top turns slightly see-through and multiplies
+  into what's under it, like a second wash of watercolor over the first, so
+  the shared area simply looks deeper. The piece underneath stays solid.
+*/
+.piece.is-overlapping .piece-body {
+  opacity: 0.88;
+  mix-blend-mode: multiply;
+}
+
+/* While a piece is being dragged, extra fingers turn it rather than scrolling or zooming the page. */
+html.is-dragging,
+html.is-dragging body {
+  touch-action: none;
+}
+
+/* Solved: the seal is pressed into the board's corner, a little crooked, by hand. */
+.board-seal {
+  position: absolute;
+  right: -14px;
+  bottom: -14px;
+  z-index: 3;
+  width: clamp(44px, 9%, 60px);
+  height: auto;
+  rotate: -6deg;
+  animation: stamp 900ms var(--ease-out) both;
+}
+
+@keyframes stamp {
+  0% {
+    opacity: 0;
+    transform: scale(1.7);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(0.93);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ---------- Pieces: tiles of watercolor ---------- */
+
+.piece {
+  padding: var(--piece-gap);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/*
+  Watercolor, in CSS: the tile's own color, a darker rim where the pigment
+  pooled as it dried, a soft lighter middle, and corners that aren't quite
+  equal, as if cut by hand. The page's paper grain shows through on top.
+*/
+.piece-body {
+  height: 100%;
+  border-radius: 7px 5px 8px 6px / 6px 8px 5px 7px;
+  background:
+    radial-gradient(ellipse 80% 70% at 45% 42%, color-mix(in oklab, var(--paper) 14%, transparent), transparent 80%),
+    var(--tone);
+  box-shadow:
+    inset 0 0 0 1.5px color-mix(in oklab, var(--tone) 60%, var(--ink-700)),
+    inset 0 0 14px color-mix(in oklab, var(--tone) 50%, color-mix(in oklab, var(--ink-700) 40%, transparent));
+}
+
+/*
+  Texture over the color, being chosen (see LookSwitcher.tsx): html[data-texture]
+  picks one. Most are a small tile of SVG noise laid over the piece and
+  multiplied into its color, the way paper texture shows through paint;
+  a few (polished, silk, paper) also change how light catches the edge.
+*/
+.piece-body {
+  position: relative;
+  overflow: hidden;
+}
+
+.piece-body::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+/* Polished: lacquer or glazed ceramic. A soft diagonal sheen, a bright top edge, a deeper base. */
+[data-texture='polished'] .piece-body {
+  background:
+    linear-gradient(to bottom, transparent 55%, color-mix(in oklab, var(--tone) 70%, var(--ink-700) 30%)),
+    var(--tone);
+  box-shadow:
+    inset 0 1.5px 0 color-mix(in oklab, white 70%, transparent),
+    inset 0 0 0 1px color-mix(in oklab, var(--tone) 55%, var(--ink-700)),
+    inset 0 -6px 10px -4px color-mix(in oklab, var(--ink-900) 22%, transparent);
+}
+
+[data-texture='polished'] .piece-body::after {
+  background: linear-gradient(118deg, color-mix(in oklab, white 55%, transparent) 0%, transparent 34%, transparent 72%, color-mix(in oklab, white 18%, transparent) 100%);
+  mix-blend-mode: screen;
+}
+
+/* Paper: matte cut paper. A fine grain, a few pale fibers, a lighter cut edge. */
+[data-texture='paper'] .piece-body {
+  background: var(--tone);
+  box-shadow:
+    inset 0 0 0 1.5px color-mix(in oklab, white 45%, transparent),
+    inset 0 0 0 2.5px color-mix(in oklab, var(--tone) 70%, var(--ink-700));
+}
+
+[data-texture='paper'] .piece-body::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.06 .5' numOctaves='1' seed='15' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 2.6 -1.6'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23f)'/%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' seed='13' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2  0 0 0 0 .17  0 0 0 0 .16  0 0 0 .4 -.1'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23f)'/%3E%3C/svg%3E");
+  mix-blend-mode: normal;
+  opacity: 0.8;
+}
+
+/* Silk: a fine woven crosshatch with a gentle sheen. */
+[data-texture='silk'] .piece-body::after {
+  background:
+    linear-gradient(105deg, transparent 20%, color-mix(in oklab, white 30%, transparent) 45%, transparent 70%),
+    repeating-linear-gradient(45deg, color-mix(in oklab, var(--ink-900) 9%, transparent) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(-45deg, color-mix(in oklab, var(--ink-900) 7%, transparent) 0 1px, transparent 1px 3px);
+  mix-blend-mode: normal;
+}
+
+/* Crackle: the fine crazing in a raku glaze. */
+[data-texture='crackle'] .piece-body::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='turbulence' baseFrequency='.032' numOctaves='2' seed='17' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2  0 0 0 0 .17  0 0 0 0 .16  -22 0 0 0 1.35'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23f)'/%3E%3C/svg%3E");
+  opacity: 0.4;
+}
+
+/* Wood: the soft grain of pale hinoki. */
+[data-texture='wood'] .piece-body::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='turbulence' baseFrequency='.004 .07' numOctaves='2' seed='19' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2  0 0 0 0 .17  0 0 0 0 .16  -2.4 0 0 0 1.0'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23f)'/%3E%3C/svg%3E");
+  background-size: 300px 300px;
+  opacity: 0.35;
+}
+
+/* Stone: mottled, like an ink stone, with a fine grain. */
+[data-texture='stone'] .piece-body::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.035' numOctaves='4' seed='21' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2  0 0 0 0 .17  0 0 0 0 .16  0 0 0 1.2 -.45'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23f)'/%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='23' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2  0 0 0 0 .17  0 0 0 0 .16  0 0 0 .4 -.1'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23f)'/%3E%3C/svg%3E");
+  opacity: 0.6;
+}
+
+/* Washi: pale paper fibers running through the color, over a fine grain. */
+[data-texture='washi'] .piece-body::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.35 .015' numOctaves='2' seed='5' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 2.2 -1.1'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23f)'/%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='9' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2  0 0 0 0 .17  0 0 0 0 .16  0 0 0 .35 -.08'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23f)'/%3E%3C/svg%3E");
+  mix-blend-mode: normal;
+  opacity: 0.75;
+}
+
+/* Grain: cold-press watercolor paper. */
+html:not([data-texture]) .piece-body::after,
+[data-texture='grain'] .piece-body::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2  0 0 0 0 .17  0 0 0 0 .16  0 0 0 .55 -.12'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23f)'/%3E%3C/svg%3E");
+}
+
+/* Brush: the faint streaks of one wide stroke laid across the tile. */
+[data-texture='brush'] .piece-body::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.006 .5' numOctaves='2' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2  0 0 0 0 .17  0 0 0 0 .16  0 0 0 .9 -.3'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23f)'/%3E%3C/svg%3E");
+  opacity: 0.8;
+}
+
+/* Granulation: pigment that settled into tiny specks as it dried. */
+[data-texture='granulation'] .piece-body::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.42' numOctaves='2' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2  0 0 0 0 .17  0 0 0 0 .16  0 0 0 3.2 -1.75'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23f)'/%3E%3C/svg%3E");
+  opacity: 0.7;
+}
+
+.piece[data-tone='1'] {
+  --tone: var(--tone-1);
+}
+.piece[data-tone='2'] {
+  --tone: var(--tone-2);
+}
+.piece[data-tone='3'] {
+  --tone: var(--tone-3);
+}
+.piece[data-tone='4'] {
+  --tone: var(--tone-4);
+}
+
+/* Putting a piece down: it settles, like a wet tile pressed onto paper. */
+.board .piece .piece-body {
+  animation: settle 420ms var(--ease-out);
+}
+
+@keyframes settle {
+  from {
+    transform: scale(1.05);
+    opacity: 0.7;
+  }
+}
+
+/* The piece being dragged leaves a faint shape where it was. */
+.piece.is-lifted {
+  opacity: 0.25;
+}
+
+.board .piece.is-lifted {
+  opacity: 0;
+}
+
+/* The copy that follows the pointer: the one thing on this screen that truly floats. */
+.drag-layer {
+  position: fixed;
+  z-index: 10;
+  pointer-events: none;
+  cursor: grabbing;
+}
+
+.drag-layer .piece-body {
+  box-shadow:
+    inset 0 0 0 1.5px color-mix(in oklab, var(--tone) 60%, var(--ink-700)),
+    inset 0 0 14px color-mix(in oklab, var(--tone) 50%, color-mix(in oklab, var(--ink-700) 40%, transparent)),
+    var(--lift-shadow);
+  transform: scale(1.03);
+}
+
+/* ---------- Tray, words and controls ---------- */
+
+.tray {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 14px;
+  min-height: calc(var(--tray-cell) * 2);
+}
+
+.tray .piece {
+  width: calc(var(--w) * var(--tray-cell));
+  height: calc(var(--h) * var(--tray-cell));
+}
+
+.status {
+  max-width: 36ch;
+  margin: 28px 0 0;
+  color: var(--ink-700);
+}
+
+.status strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--ink-900);
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+}
+
+/* Keyboard tips only make sense where there's a mouse (and so likely a keyboard)… */
+@media (hover: none) {
+  .keyboard-tip {
+    display: none;
+  }
+}
+
+/* …and the second-finger tip only where there's a touch screen. */
+@media (hover: hover) {
+  .touch-tip {
+    display: none;
+  }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 28px;
+  margin-top: 28px;
+}
+
+/* Quiet actions: words with a pink brushed underline, like the hero's "or choose a board". */
+.actions > button:not(.brush-button) {
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--ink-700);
+  text-decoration: underline;
+  text-decoration-color: var(--sakura-300);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 7px;
+  transition:
+    color 400ms var(--ease-out),
+    text-decoration-color 400ms var(--ease-out);
+}
+
+.actions > button:not(.brush-button):hover:not(:disabled) {
+  color: var(--ink-900);
+  text-decoration-color: var(--sakura-500);
+}
+
+.actions > button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ---------- Arriving: everything bleeds in like ink, one after another ---------- */
+
+.play-bar,
+.status,
+.actions {
+  animation: ink-in var(--reveal) var(--ease-out) both;
+}
+
+.play-bar {
+  animation-delay: 120ms;
+}
+
+.status {
+  animation-delay: 520ms;
+}
+
+.actions {
+  animation-delay: 640ms;
+}
+
+/* The pieces are laid out on the tray one by one. */
+.tray .piece {
+  animation: lay-down 700ms var(--ease-out) both;
+  animation-delay: calc(280ms + var(--i, 0) * 70ms);
+}
+
+@keyframes lay-down {
+  from {
+    opacity: 0;
+    transform: translateY(14px) rotate(-3deg);
+  }
+}
+
+@media (max-width: 720px) {
+  .play {
+    --board-size: min(100vw - 56px, 58dvh);
+
+    padding-top: 16px;
+  }
+
+  .play-bar {
+    margin-bottom: 20px;
+  }
+
+  .play-range {
+    bottom: -4vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .board .piece .piece-body,
+  .tray .piece {
+    animation: none;
+  }
+
+  .play-bar,
+  .status,
+  .actions,
+  .board-seal {
+    animation-name: fade-in;
+  }
+}
+
+/* TEMPORARY: the texture switcher. Delete with LookSwitcher.tsx. */
+.look-switcher {
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  z-index: 20;
+  display: grid;
+  gap: 4px;
+  max-width: calc(100% - 24px);
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: var(--paper);
+  box-shadow: 0 6px 20px -10px color-mix(in oklab, var(--ink-900) 50%, transparent);
+  translate: -50% 0;
+}
+
+.look-switcher [role='group'] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+}
+
+.look-label {
+  width: 64px;
+  color: var(--ink-700);
+  font-size: 0.8125rem;
+}
+
+.look-switcher button {
+  padding: 3px 10px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--ink-700);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+
+.look-switcher button[aria-pressed='true'] {
+  background: var(--ink-900);
+  color: var(--paper);
+}

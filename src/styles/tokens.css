@@ -56,16 +56,15 @@
   --blocked: var(--ink-700);
 
   /* Pieces take one of four tones */
-  --tone-1: var(--mist-teal);
-  --tone-2: var(--sakura-300);
-  --tone-3: var(--paper);
+  --tone-1: var(--sakura-300);
+  --tone-2: var(--mist-teal);
+  --tone-3: var(--glow-300);
   --tone-4: var(--ink-300);
   --piece-edge: color-mix(in oklab, var(--ink-900) 16%, transparent);
 
-  /* Where a dragged piece would land, and where pieces overlap (allowed while playing, marked softly) */
+  /* Where a dragged piece would land: a clean fit, or one that would overlap (allowed) */
   --ghost-fits: color-mix(in oklab, var(--mist-teal) 60%, transparent);
   --overlap: color-mix(in oklab, var(--sakura-300) 55%, transparent);
-  --overlap-dot: color-mix(in oklab, var(--ink-900) 45%, transparent);
 
   /* Shape and depth */
   --piece-gap: 3px;

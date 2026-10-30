@@ -162,6 +162,12 @@ export function WashFilters() {
           <feGaussianBlur stdDeviation="18" />
         </filter>
 
+        {/* The edge of a big sheet, like the play board: a slow, gentle wobble rather than a ragged one. */}
+        <filter id="sheet-edge" x="-2%" y="-2%" width="104%" height="104%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.006" numOctaves="2" seed="43" result="warp" />
+          <feDisplacementMap in="SourceGraphic" in2="warp" scale="9" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+
         {/* A branch in one loaded stroke: slightly wobbly, darker at the edges. */}
         <filter id="ink" x="-10%" y="-10%" width="120%" height="120%">
           <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="12" result="warp" />

@@ -1,4 +1,4 @@
-import type { PointerEvent } from 'react'
+import type { CSSProperties, PointerEvent } from 'react'
 import { currentFootprint, type GameState } from '../state/gameReducer'
 import { Piece } from './Piece'
 import { toneFor } from './tone'
@@ -24,6 +24,8 @@ export function Tray({ state, liftedId, onPiecePointerDown, onRotate }: Props) {
             h={h}
             tone={toneFor(index)}
             className={piece.id === liftedId ? 'is-lifted' : ''}
+            // Its place in the tray, so the pieces can be laid out one after another (see play.css).
+            style={{ '--i': index } as CSSProperties}
             onPointerDown={(event) => onPiecePointerDown(event, piece.id)}
             onContextMenu={() => onRotate(piece.id)}
           />

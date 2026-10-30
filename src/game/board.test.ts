@@ -113,6 +113,7 @@ describe('clashes', () => {
       { row: 1, col: 1, w: 1, h: 1 },
     ])
     expect([...pieces].sort()).toEqual(['A', 'B'])
+    expect([...clashes(puzzle, placements).onTop]).toEqual(['B']) // B went down last, so it's on top
   })
 
   it('counts a piece lying on a blocked square', () => {

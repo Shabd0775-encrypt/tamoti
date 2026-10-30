@@ -6,14 +6,18 @@
   The tree and the peak hold the left; the words and the board sit on the right.
 */
 
-.hero {
-  /* Mountain tones, mixed from the palette: paler and bluer with distance. */
+/* Mountain tones, mixed from the palette: paler and bluer with distance. Shared with the play screen's scenery. */
+.hero,
+.play-scenery {
   --mtn-snow: color-mix(in oklab, var(--mist) 70%, var(--paper));
   /* The far ranges and hills take on a little of the rose light. */
   --mtn-far: color-mix(in oklab, var(--sakura-100) 30%, color-mix(in oklab, var(--mist-teal) 18%, var(--mist)));
   --mtn-peak: color-mix(in oklab, var(--ink-300) 70%, var(--mist-teal));
   --mtn-mid: color-mix(in oklab, var(--ink-300) 70%, var(--sakura-300) 14%);
   --mtn-near: color-mix(in oklab, var(--ink-500) 85%, var(--teal-deep));
+}
+
+.hero {
   --gutter: clamp(16px, 6vw, 112px);
 
   position: relative;
@@ -360,13 +364,6 @@
   animation-duration: 1400ms;
 }
 
-@keyframes ink-in {
-  from {
-    opacity: 0;
-    filter: blur(8px);
-    transform: scale(0.985);
-  }
-}
 
 /* ---------- Narrower laptops and tablets: the words need more of the width ---------- */
 
@@ -482,8 +479,3 @@
   }
 }
 
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-}

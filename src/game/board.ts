@@ -63,9 +63,13 @@ export function canPlace(puzzle: Puzzle, placements: Placements, pieceId: string
 
 /**
  * Where pieces are doubled up: every cell covered by two or more pieces, or
- * by a piece lying on a blocked square, and which pieces are involved.
+ * by a piece lying on a blocked square; which pieces are involved; and which
+ * of them lie on top (the last one put down wins each doubled square).
  */
-export function clashes(puzzle: Puzzle, placements: Placements): { cells: Rect[]; pieces: Set<string> } {
+export function clashes(
+  puzzle: Puzzle,
+  placements: Placements,
+): { cells: Rect[]; pieces: Set<string>; onTop: Set<string> } {
   const blocked = occupancy(puzzle, {})
   const covering: string[][][] = Array.from({ length: puzzle.size }, () =>
     Array.from({ length: puzzle.size }, () => [] as string[]),
@@ -76,15 +80,17 @@ export function clashes(puzzle: Puzzle, placements: Placements): { cells: Rect[]
 
   const cells: Rect[] = []
   const pieces = new Set<string>()
+  const onTop = new Set<string>()
   covering.forEach((row, r) =>
     row.forEach((ids, c) => {
       if (ids.length > 1 || (ids.length === 1 && blocked[r][c] === 'blocked')) {
         cells.push({ row: r, col: c, w: 1, h: 1 })
         for (const id of ids) pieces.add(id)
+        onTop.add(ids[ids.length - 1]) // placements are kept in the order they were put down
       }
     }),
   )
-  return { cells, pieces }
+  return { cells, pieces, onTop }
 }
 
 /**

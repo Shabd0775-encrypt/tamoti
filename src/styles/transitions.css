@@ -1,0 +1,58 @@
+/*
+  Moving between screens (see `go` in state/route.ts). The browser takes a
+  picture of the old screen and blends it into the new one; we only say how.
+
+  - The pressed board ("puzzle-board") glides and grows into the play
+    screen's board.
+  - Everything else: the old screen fades out quickly while the new one
+    bleeds in, slightly soft at first, the way ink spreads into wet paper.
+*/
+
+::view-transition-group(puzzle-board) {
+  animation-duration: 850ms;
+  animation-timing-function: var(--ease-out);
+}
+
+/* The two pictures of the board blend into each other as it moves. */
+::view-transition-old(puzzle-board),
+::view-transition-new(puzzle-board) {
+  animation-duration: 850ms;
+  animation-timing-function: var(--ease-out);
+  height: 100%;
+}
+
+::view-transition-old(root) {
+  animation: screen-out 420ms ease-out both;
+}
+
+::view-transition-new(root) {
+  animation: screen-in 900ms var(--ease-out) both;
+}
+
+@keyframes screen-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes screen-in {
+  from {
+    opacity: 0;
+    filter: blur(5px);
+  }
+}
+
+/* Shared by every screen's arrival. */
+@keyframes ink-in {
+  from {
+    opacity: 0;
+    filter: blur(8px);
+    transform: scale(0.985);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}

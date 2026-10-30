@@ -65,7 +65,8 @@ function drawPetal(ctx: CanvasRenderingContext2D, p: Petal, time: number) {
   ctx.restore()
 }
 
-export function Petals() {
+/** `density` scales how many petals fall: 1 for the hero, less where the page should stay quiet. */
+export function Petals({ density = 1 }: { density?: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -89,7 +90,7 @@ export function Petals() {
       canvas.width = width * ratio
       canvas.height = height * ratio
       ctx.setTransform(ratio, 0, 0, ratio, 0, 0)
-      const count = width < 640 ? 18 : 34
+      const count = Math.round((width < 640 ? 18 : 34) * density)
       petals = Array.from({ length: count }, () => makePetal(width, height, colors, true))
     }
 
@@ -141,7 +142,7 @@ export function Petals() {
       window.removeEventListener('resize', resize)
       document.removeEventListener('visibilitychange', onVisibility)
     }
-  }, [])
+  }, [density])
 
   return <canvas className="petals" ref={canvasRef} aria-hidden="true" />
 }

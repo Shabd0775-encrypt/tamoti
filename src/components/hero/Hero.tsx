@@ -6,6 +6,7 @@
 // the tree, falling petals, then the words.
 
 import { useEffect, useRef, type RefObject } from 'react'
+import { BrushButton } from '../BrushButton'
 import type { Rect } from '../../game/types'
 import { Backdrop, treeShape } from './Backdrop'
 import { BoardPreview } from './BoardPreview'
@@ -17,7 +18,8 @@ type Props = {
   size: number
   /** The puzzle the button opens: the first one not yet solved at this size. */
   next: { number: number; blocked: Rect[]; tier: string }
-  onBegin: () => void
+  /** Open that puzzle. `from` is the painted board, which flows into the play screen's board. */
+  onBegin: (from: Element | null) => void
 }
 
 /**
@@ -55,6 +57,7 @@ function useParallax(root: RefObject<HTMLElement | null>) {
 
 export function Hero({ size, next, onBegin }: Props) {
   const root = useRef<HTMLElement>(null)
+  const preview = useRef<SVGSVGElement>(null)
   useParallax(root)
 
   const label = `${size}×${size}, No. ${next.number}`
@@ -79,17 +82,15 @@ export function Hero({ size, next, onBegin }: Props) {
           Fill every open square with the pieces you are given. No timer, no score. Only a quiet board, for as long as
           you like.
         </p>
-        <BoardPreview size={size} blocked={next.blocked} caption={`${label} · ${next.tier}`} onOpen={onBegin} />
+        <BoardPreview
+          size={size}
+          blocked={next.blocked}
+          caption={`${label} · ${next.tier}`}
+          onOpen={() => onBegin(preview.current)}
+          svgRef={preview}
+        />
         <div className="hero-actions">
-          <button type="button" className="brush-button" onClick={onBegin}>
-            <svg className="brush-stroke" viewBox="0 0 300 80" preserveAspectRatio="none" aria-hidden="true">
-              <path
-                filter="url(#dry-brush)"
-                d="M10 46C24 28 78 19 150 20S270 22 291 31C299 40 292 54 268 57S146 64 74 61 6 59 10 46Z"
-              />
-            </svg>
-            <span>Begin {label}</span>
-          </button>
+          <BrushButton onClick={() => onBegin(preview.current)}>Begin {label}</BrushButton>
           <a className="hero-more" href="#boards">
             or choose a board
           </a>

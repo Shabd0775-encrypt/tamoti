@@ -4,6 +4,8 @@ import './styles/tokens.css'
 import './styles/global.css'
 import './styles/hero.css'
 import './styles/library.css'
+import './styles/play.css'
+import './styles/transitions.css'
 import App from './App.tsx'
 
 createRoot(document.getElementById('root')!).render(
