@@ -43,7 +43,7 @@ export function Library({ size, go, solved, found }: Props) {
 
   return (
     <main className="library">
-      <SiteNav />
+      <SiteNav onDaily={() => go({ screen: 'play', id: dailyId })} />
       <Hero
         size={size}
         next={{ number: next.number, blocked: next.blocked, tier: tierNames[next.tier] }}

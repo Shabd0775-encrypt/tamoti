@@ -43,8 +43,12 @@
   list-style: none;
 }
 
-.site-nav ul a {
+.site-nav ul a,
+.site-nav ul button {
   display: inline-block;
+  border: 0;
+  background: none;
+  font: inherit;
   padding: 6px 0;
   color: var(--ink-700);
   font-size: 0.9375rem;
@@ -58,9 +62,33 @@
 }
 
 .site-nav ul a:hover,
-.site-nav ul a:focus-visible {
+.site-nav ul a:focus-visible,
+.site-nav ul button:hover,
+.site-nav ul button:focus-visible {
   color: var(--ink-900);
   text-decoration-color: var(--sakura-300);
+}
+
+/* Phones have room for the three links but not the name as well: the links win, on one line. */
+@media (max-width: 560px) {
+  .site-nav {
+    justify-content: flex-end;
+    padding: 12px 16px;
+  }
+
+  .site-nav-mark {
+    display: none;
+  }
+
+  .site-nav ul {
+    gap: 18px;
+  }
+
+  .site-nav ul a,
+  .site-nav ul button {
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

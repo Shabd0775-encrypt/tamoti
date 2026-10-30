@@ -1,11 +1,12 @@
-// The menu along the top of the library: two plain links on the right that
-// take you straight to "How to play" and the puzzle library. It stays put as
+// The menu along the top of the library: three plain links on the right,
+// to "How to play", the puzzle library, and today's board. It stays put as
 // you scroll; once you're past the top of the painting it gets a paper
 // background, and the name appears on the left as a way back up.
 
 import { useEffect, useState } from 'react'
 
-export function SiteNav() {
+/** `onDaily` opens today's board. */
+export function SiteNav({ onDaily }: { onDaily: () => void }) {
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
@@ -26,6 +27,11 @@ export function SiteNav() {
         </li>
         <li>
           <a href="#boards">Puzzle library</a>
+        </li>
+        <li>
+          <button type="button" onClick={onDaily}>
+            Today's board
+          </button>
         </li>
       </ul>
     </nav>
