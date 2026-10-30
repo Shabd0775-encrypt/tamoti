@@ -786,3 +786,183 @@
     transform: none;
   }
 }
+
+/* ---------- The painting below the hero (being chosen; see components/backdrop) ---------- */
+
+/* Full-width paintings may poke past the column; never let them make the page scroll sideways. */
+.library {
+  overflow-x: clip;
+}
+
+.library-rest {
+  position: relative;
+  isolation: isolate;
+}
+
+/* Each section is its own little stack, so its painting sits behind its words but above the paper. */
+.howto,
+.size-picker,
+.piece-set,
+.puzzles {
+  position: relative;
+  isolation: isolate;
+}
+
+/* A painting the full width of the screen, behind one section. */
+.section-art {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(50% - 50vw);
+  z-index: -1;
+  width: 100vw;
+  pointer-events: none;
+}
+
+.wash svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Vignettes live in the margins either side of the column. */
+.vignette > svg {
+  position: absolute;
+  height: auto;
+}
+
+.vignette .hero-tree {
+  overflow: hidden;
+}
+
+/* Each vignette is sized to its margin: the space between the screen edge and the 960px column. */
+.vignette {
+  --margin: max(0px, (100vw - 960px) / 2);
+}
+
+.vignette-howto > svg {
+  left: 0;
+  top: -4%;
+  width: min(var(--margin) + 24px, 340px);
+}
+
+.vignette-boards > svg {
+  right: calc(var(--margin) * 0.1);
+  top: 10%;
+  width: min(var(--margin) * 0.8, 230px);
+}
+
+.vignette-pieces > svg {
+  left: 0;
+  bottom: 8%;
+  width: min(var(--margin), 320px);
+}
+
+.vignette-puzzles > svg {
+  right: 0;
+  top: 22%;
+  width: min(var(--margin), 380px);
+}
+
+/* Narrower screens have slim margins: the vignettes step back, and on phones they rest. */
+@media (max-width: 1240px) {
+  .vignette {
+    opacity: 0.45;
+  }
+}
+
+@media (max-width: 720px) {
+  .vignette {
+    display: none;
+  }
+}
+
+/* The scroll painting: held on screen (sticky) all the way from the hero to the footer. */
+.emaki {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.emaki-stage {
+  --p: 0;
+
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+  background: linear-gradient(to bottom, color-mix(in oklab, var(--glow-100) 55%, var(--paper)), var(--paper) 55%);
+}
+
+/* Dusk gathers as you go down: a cooler, rosier sky. */
+.emaki-dusk {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--mist-teal) 30%, var(--sakura-100)),
+    var(--paper) 60%
+  );
+  opacity: calc(var(--p) * 0.9);
+}
+
+.emaki-layer {
+  position: absolute;
+  left: 0;
+  bottom: -6vh;
+  height: 100%;
+  width: auto;
+  aspect-ratio: 4.8 / 1;
+  opacity: 0.5;
+  will-change: transform;
+}
+
+/* Far hills slide a little, near ones more: the landscape unrolls as you read. */
+.emaki-far {
+  translate: calc(var(--p) * -1 * (100% - 100vw) * 0.55) 0;
+}
+
+.emaki-near {
+  opacity: 0.4;
+  translate: calc(var(--p) * -1 * (100% - 100vw)) 0;
+}
+
+/* TEMPORARY: the background switcher. Delete with BackdropSwitcher.tsx. */
+.backdrop-switcher {
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  z-index: 30;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  max-width: calc(100% - 24px);
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--paper);
+  box-shadow: 0 6px 20px -10px color-mix(in oklab, var(--ink-900) 50%, transparent);
+  translate: -50% 0;
+}
+
+.switcher-label {
+  margin-right: 6px;
+  color: var(--ink-700);
+  font-size: 0.8125rem;
+}
+
+.backdrop-switcher button {
+  padding: 3px 10px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--ink-700);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+
+.backdrop-switcher button[aria-pressed='true'] {
+  background: var(--ink-900);
+  color: var(--paper);
+}

@@ -4,6 +4,7 @@
 
 import type { CSSProperties } from 'react'
 import { seededRandom } from '../game/rng'
+import { SectionArt } from './backdrop/SectionArt'
 import { blob } from './hero/treeParts'
 
 type Props = {
@@ -34,6 +35,7 @@ function gridLines(n: number) {
 export function SizePicker({ sizes, current, progress, onChoose }: Props) {
   return (
     <section className="size-picker" id="boards" aria-labelledby="boards-title">
+      <SectionArt name="boards" />
       <div className="size-picker-intro" data-reveal>
         <h2 id="boards-title">
           Choose a <em className="accent">board</em>

@@ -6,9 +6,11 @@
   The tree and the peak hold the left; the words and the board sit on the right.
 */
 
-/* Mountain tones, mixed from the palette: paler and bluer with distance. Shared with the play screen's scenery. */
+/* Mountain tones, mixed from the palette: paler and bluer with distance. Shared by every painted landscape. */
 .hero,
-.play-scenery {
+.play-scenery,
+.emaki,
+.section-art {
   --mtn-snow: color-mix(in oklab, var(--mist) 70%, var(--paper));
   /* The far ranges and hills take on a little of the rose light. */
   --mtn-far: color-mix(in oklab, var(--sakura-100) 30%, color-mix(in oklab, var(--mist-teal) 18%, var(--mist)));

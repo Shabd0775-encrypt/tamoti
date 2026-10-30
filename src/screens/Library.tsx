@@ -1,6 +1,10 @@
 // The library: pick a board size, see its pieces, choose a puzzle.
 
 import type { CSSProperties } from 'react'
+import { BackdropSwitcher } from '../components/backdrop/BackdropSwitcher'
+import { BackdropContext, useBackdropChoice } from '../components/backdrop/choice'
+import { Emaki } from '../components/backdrop/Emaki'
+import { SectionArt } from '../components/backdrop/SectionArt'
 import { BrushDivider } from '../components/BrushDivider'
 import { Footer } from '../components/Footer'
 import { Hero } from '../components/hero/Hero'
@@ -39,6 +43,7 @@ export function Library({ size, go, solved, found }: Props) {
   const next = puzzles.find((p) => !solved.has(puzzleId(size, p.number))) ?? puzzles[0]
   useReveal(size) // new boards appear when the size changes, so look again
   const dailyId = dailyPuzzleId()
+  const [backdrop, chooseBackdrop] = useBackdropChoice()
   const daily = findPuzzle(dailyId)!
 
   return (
@@ -54,111 +59,123 @@ export function Library({ size, go, solved, found }: Props) {
         }}
       />
 
-      <div className="library-body">
-        <HowToPlay />
+      <BackdropContext.Provider value={backdrop}>
+        <div className="library-rest">
+          {backdrop === 'emaki' && <Emaki />}
+          <div className="library-body">
+            <HowToPlay />
 
-        <BrushDivider />
+            <BrushDivider />
 
-        <SizePicker
-          sizes={sizes}
-          current={size}
-          progress={Object.fromEntries(
-            sizes.map((s) => [
-              s,
-              {
-                done: library.sizes[s].puzzles.filter((p) => solved.has(puzzleId(s, p.number))).length,
-                total: library.sizes[s].puzzles.length,
-              },
-            ]),
-          )}
-          onChoose={(s) => go({ screen: 'library', size: s })}
-        />
+            <SizePicker
+              sizes={sizes}
+              current={size}
+              progress={Object.fromEntries(
+                sizes.map((s) => [
+                  s,
+                  {
+                    done: library.sizes[s].puzzles.filter((p) => solved.has(puzzleId(s, p.number))).length,
+                    total: library.sizes[s].puzzles.length,
+                  },
+                ]),
+              )}
+              onChoose={(s) => go({ screen: 'library', size: s })}
+            />
 
-        <BrushDivider />
+            <BrushDivider />
 
-        <section className="piece-set" aria-labelledby="piece-set-title" style={{ '--size': size } as CSSProperties}>
-          <div className="section-head" data-reveal>
-            <h2 id="piece-set-title">
-              The <em className="accent">pieces</em> for {size}×{size}
-            </h2>
-            <p>
-              Every {size}×{size} board is filled with these {pieces.length}. No two are the same shape, and the dark
-              squares never move.
-            </p>
-          </div>
-          <ul className="piece-sheet" role="list">
-            {pieces.map((piece, index) => (
-              <li key={piece.id} data-reveal style={{ '--d': `${index * 70}ms` } as CSSProperties}>
-                <Piece w={piece.w} h={piece.h} tone={toneFor(index)} />
-                <span className="piece-size">
-                  {piece.w}×{piece.h}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <BrushDivider />
-
-        <section className="puzzles" aria-labelledby="puzzles-title">
-          <div className="section-head" data-reveal>
-            <h2 id="puzzles-title">
-              The {puzzles.length} <em className="accent">boards</em>
-            </h2>
-            <p>
-              {solvedHere === 0
-                ? 'From gentle to deep. Start anywhere; nothing is locked.'
-                : `${solvedHere} of ${puzzles.length} solved. Start anywhere; nothing is locked.`}
-            </p>
-          </div>
-
-          {tiers.map((tier) => {
-            const inTier = puzzles.filter((p) => p.tier === tier)
-            if (inTier.length === 0) return null
-            return (
-              <div key={tier} className="tier">
-                <div className="tier-head" data-reveal>
-                  <h3 id={`tier-${tier}`}>{tierNames[tier]}</h3>
-                  <p>{tierNotes[tier]}</p>
-                </div>
-                <ol className="puzzle-grid" aria-labelledby={`tier-${tier}`}>
-                  {inTier.map((p, index) => {
-                    const id = puzzleId(size, p.number)
-                    const isSolved = solved.has(id)
-                    return (
-                      <li key={id} data-reveal style={{ '--d': `${index * 60}ms` } as CSSProperties}>
-                        <button
-                          type="button"
-                          className={`puzzle-tile ${isSolved ? 'is-solved' : ''}`}
-                          onClick={(event) =>
-                            go({ screen: 'play', id }, event.currentTarget.querySelector('.painted-board'))
-                          }
-                          aria-label={`Puzzle ${p.number}, ${tierNames[tier]}${isSolved ? ', solved' : ''}`}
-                        >
-                          <span className="tile-board">
-                            <PaintedBoard size={size} blocked={p.blocked} />
-                            {isSolved && <Seal className="tile-seal" />}
-                          </span>
-                          <span className="puzzle-number">
-                            No. {p.number}
-                            {(found[id]?.length ?? 0) > 0 && p.solutions > 1 && (
-                              <span className="puzzle-ways">
-                                {found[id].length} of {p.solutions} ways
-                              </span>
-                            )}
-                          </span>
-                        </button>
-                      </li>
-                    )
-                  })}
-                </ol>
+            <section
+              className="piece-set"
+              aria-labelledby="piece-set-title"
+              style={{ '--size': size } as CSSProperties}
+            >
+              <SectionArt name="pieces" />
+              <div className="section-head" data-reveal>
+                <h2 id="piece-set-title">
+                  The <em className="accent">pieces</em> for {size}×{size}
+                </h2>
+                <p>
+                  Every {size}×{size} board is filled with these {pieces.length}. No two are the same shape, and the
+                  dark squares never move.
+                </p>
               </div>
-            )
-          })}
-        </section>
-      </div>
+              <ul className="piece-sheet" role="list">
+                {pieces.map((piece, index) => (
+                  <li key={piece.id} data-reveal style={{ '--d': `${index * 70}ms` } as CSSProperties}>
+                    <Piece w={piece.w} h={piece.h} tone={toneFor(index)} />
+                    <span className="piece-size">
+                      {piece.w}×{piece.h}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+
+            <BrushDivider />
+
+            <section className="puzzles" aria-labelledby="puzzles-title">
+              <SectionArt name="puzzles" />
+              <div className="section-head" data-reveal>
+                <h2 id="puzzles-title">
+                  The {puzzles.length} <em className="accent">boards</em>
+                </h2>
+                <p>
+                  {solvedHere === 0
+                    ? 'From gentle to deep. Start anywhere; nothing is locked.'
+                    : `${solvedHere} of ${puzzles.length} solved. Start anywhere; nothing is locked.`}
+                </p>
+              </div>
+
+              {tiers.map((tier) => {
+                const inTier = puzzles.filter((p) => p.tier === tier)
+                if (inTier.length === 0) return null
+                return (
+                  <div key={tier} className="tier">
+                    <div className="tier-head" data-reveal>
+                      <h3 id={`tier-${tier}`}>{tierNames[tier]}</h3>
+                      <p>{tierNotes[tier]}</p>
+                    </div>
+                    <ol className="puzzle-grid" aria-labelledby={`tier-${tier}`}>
+                      {inTier.map((p, index) => {
+                        const id = puzzleId(size, p.number)
+                        const isSolved = solved.has(id)
+                        return (
+                          <li key={id} data-reveal style={{ '--d': `${index * 60}ms` } as CSSProperties}>
+                            <button
+                              type="button"
+                              className={`puzzle-tile ${isSolved ? 'is-solved' : ''}`}
+                              onClick={(event) =>
+                                go({ screen: 'play', id }, event.currentTarget.querySelector('.painted-board'))
+                              }
+                              aria-label={`Puzzle ${p.number}, ${tierNames[tier]}${isSolved ? ', solved' : ''}`}
+                            >
+                              <span className="tile-board">
+                                <PaintedBoard size={size} blocked={p.blocked} />
+                                {isSolved && <Seal className="tile-seal" />}
+                              </span>
+                              <span className="puzzle-number">
+                                No. {p.number}
+                                {(found[id]?.length ?? 0) > 0 && p.solutions > 1 && (
+                                  <span className="puzzle-ways">
+                                    {found[id].length} of {p.solutions} ways
+                                  </span>
+                                )}
+                              </span>
+                            </button>
+                          </li>
+                        )
+                      })}
+                    </ol>
+                  </div>
+                )
+              })}
+            </section>
+          </div>
+        </div>
+      </BackdropContext.Provider>
 
       <Footer />
+      <BackdropSwitcher value={backdrop} onChoose={chooseBackdrop} />
     </main>
   )
 }
