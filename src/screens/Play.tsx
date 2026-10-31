@@ -16,7 +16,7 @@ import { findPuzzle, library, puzzleId, tierNames } from '../game/library'
 import { currentFootprint, gameReducer, newGame, type GameAction } from '../state/gameReducer'
 import type { Go } from '../state/route'
 import { play, useSound } from '../state/sound'
-import { useDrag } from '../hooks/useDrag'
+import { draggedBox, useDrag } from '../hooks/useDrag'
 
 type Props = {
   id: string
@@ -187,14 +187,26 @@ export function Play({ id, go, found, onSolved }: Props) {
 
   const draggedIndex = drag ? puzzle.pieces.findIndex((p) => p.id === drag.pieceId) : -1
   const dragged = drag && { ...footprint(puzzle.pieces[draggedIndex], drag.rotated), tone: toneFor(draggedIndex) }
+  const box = drag && dragged && draggedBox(drag, dragged.w, dragged.h, cellSize)
   // The tray's square size: about 34px, smaller for big sets, so all the pieces fit in a tray about
   // 340px wide and 260px tall (their total area × square² is roughly what the tray has to hold).
   const totalArea = puzzle.pieces.reduce((sum, piece) => sum + piece.w * piece.h, 0)
   const trayCap = Math.min(34, Math.floor(Math.sqrt(52_000 / totalArea)))
+  // On a phone the tray has to fit under the board in about 360 × 170px, so everything is on one screen.
+  const trayCapPhone = Math.max(16, Math.min(30, Math.floor(Math.sqrt(24_000 / totalArea))))
   const allWays = [...found, ...(key && !found.includes(key) ? [key] : [])]
 
   return (
-    <main className="play" style={{ '--size': puzzle.size, '--tray-cap': `${trayCap}px` } as CSSProperties}>
+    <main
+      className="play"
+      style={
+        {
+          '--size': puzzle.size,
+          '--tray-cap': `${trayCap}px`,
+          '--tray-cap-phone': `${trayCapPhone}px`,
+        } as CSSProperties
+      }
+    >
       <PlayScenery />
       <header className="play-bar">
         <button type="button" className="back" onClick={() => go({ screen: 'library', size: entry.size })}>
@@ -279,9 +291,12 @@ export function Play({ id, go, found, onSolved }: Props) {
                 <strong>
                   {piecesLeft} {piecesLeft === 1 ? 'piece' : 'pieces'} to place
                 </strong>
-                Drag a piece onto the board; pieces can overlap while you try things. Tap a piece to turn it
-                <span className="keyboard-tip">, or press R while dragging. Keys: Tab, Enter, arrows, R, Delete</span>
-                <span className="touch-tip">, or tap with a second finger while dragging</span>.
+                <span className="status-help">
+                  Drag a piece onto the board; pieces can overlap while you try things. Tap a piece to turn it
+                  <span className="keyboard-tip">, or press R while dragging. Keys: Tab, Enter, arrows, R, Delete</span>
+                  <span className="touch-tip">, or tap with a second finger while dragging</span>.
+                </span>
+                <span className="status-short">Tap a piece to turn it.</span>
               </>
             )}
           </p>
@@ -335,17 +350,17 @@ export function Play({ id, go, found, onSolved }: Props) {
         </aside>
       </div>
 
-      {drag && dragged && (
+      {box && dragged && (
         <Piece
           w={dragged.w}
           h={dragged.h}
           tone={dragged.tone}
           className="drag-layer"
           style={{
-            left: drag.pointer.x - drag.grab.x * dragged.w * cellSize,
-            top: drag.pointer.y - drag.grab.y * dragged.h * cellSize,
-            width: dragged.w * cellSize,
-            height: dragged.h * cellSize,
+            // Moved with a transform, which the graphics chip does alone: nothing underneath is repainted.
+            transform: `translate3d(${box.left}px, ${box.top}px, 0)`,
+            width: box.width,
+            height: box.height,
           }}
         />
       )}

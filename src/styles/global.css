@@ -9,6 +9,9 @@
 html {
   color-scheme: light;
   -webkit-text-size-adjust: 100%;
+  /* No double-tap zoom, so phones don't hold every tap back to see whether a second one follows. */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {

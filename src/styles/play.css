@@ -180,6 +180,8 @@
   width: 100%;
   height: 100%;
   overflow: visible;
+  /* Its own layer, painted once: pieces coming and going above it never make the paper's filters run again. */
+  will-change: transform;
 }
 
 /* The grid lines, exactly over the playing area. */
@@ -335,6 +337,8 @@ html.is-dragging body {
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
+  /* No "copy / share" bubble when a finger rests on a piece. */
+  -webkit-touch-callout: none;
 }
 
 /*
@@ -390,7 +394,10 @@ html.is-dragging body {
 /* The copy that follows the pointer: the one thing on this screen that truly floats. */
 .drag-layer {
   position: fixed;
+  top: 0;
+  left: 0;
   z-index: 10;
+  will-change: transform;
   pointer-events: none;
   cursor: grabbing;
 }
@@ -416,6 +423,19 @@ html.is-dragging body {
 .tray .piece {
   width: calc(var(--w) * var(--tray-cell));
   height: calc(var(--h) * var(--tray-cell));
+}
+
+/* Fingers are bigger than thin pieces: on touch screens each tray piece can be picked up from a little past its edges. */
+@media (pointer: coarse) {
+  .tray .piece {
+    position: relative;
+  }
+
+  .tray .piece::after {
+    content: '';
+    position: absolute;
+    inset: -5px;
+  }
 }
 
 .status {
@@ -561,15 +581,92 @@ html.is-dragging body {
   }
 }
 
+/* The short line of help is for phones; elsewhere there's room for the whole of it. */
+.status-short {
+  display: none;
+}
+
+/*
+  Phones: everything you play with on one screen, no scrolling. A slim bar,
+  the board as wide as the screen allows, the tray tucked under it with
+  smaller squares, one line of status, then the quiet actions.
+*/
 @media (max-width: 720px) {
   .play {
-    --board-size: min(100vw - 56px, 58dvh);
+    --board-size: min(100vw - 44px, 52dvh);
+    --tray-cell: min(calc(var(--cell-size) * 0.6), var(--tray-cap-phone, 24px));
 
-    padding-top: 16px;
+    padding: 10px 12px 20px;
   }
 
   .play-bar {
-    margin-bottom: 20px;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+
+  .play-bar h1 {
+    font-size: 1.375rem;
+    white-space: nowrap;
+  }
+
+  .play-tier {
+    font-size: 0.9375rem;
+    white-space: nowrap;
+  }
+
+  .play-daily {
+    display: none;
+  }
+
+  .sound-toggle {
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+
+  .play-area {
+    gap: 10px;
+  }
+
+  .board {
+    margin: 0 auto;
+    padding: 8px;
+  }
+
+  .tray {
+    gap: 8px;
+    justify-content: center;
+    min-height: 0;
+  }
+
+  .status {
+    max-width: none;
+    margin-top: 12px;
+    font-size: 0.9375rem;
+  }
+
+  .status strong {
+    display: inline;
+    margin: 0 6px 0 0;
+    font-size: 1.125rem;
+  }
+
+  .status-help {
+    display: none;
+  }
+
+  .status-short {
+    display: inline;
+  }
+
+  .actions {
+    gap: 8px 22px;
+    margin-top: 10px;
+  }
+
+  .ways {
+    margin-top: 20px;
   }
 
   .play-range {

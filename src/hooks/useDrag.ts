@@ -6,6 +6,9 @@
 //
 // To turn a piece while dragging it: press R, right-click, or (on a touch
 // screen) tap anywhere with a second finger.
+//
+// On a touch screen the piece floats just above the finger while it moves,
+// so the finger never hides where it's about to land.
 
 import { useEffect, useState, type Dispatch, type PointerEvent, type RefObject } from 'react'
 import { canPlace, footprint } from '../game/board'
@@ -14,6 +17,8 @@ import type { GameAction, GameState } from '../state/gameReducer'
 
 /** How far (in pixels) a press must travel before it counts as a drag, not a tap. */
 const DRAG_THRESHOLD = 6
+/** On a touch screen, the gap (in pixels) between the fingertip and the bottom of the piece it carries. */
+const FINGER_GAP = 22
 
 export type Drag = {
   pieceId: string
@@ -24,6 +29,8 @@ export type Drag = {
   /** Where on the piece the pointer holds it, from 0 to 1 across and down. */
   grab: { x: number; y: number }
   pointer: { x: number; y: number }
+  /** A finger, rather than a mouse or pen: the piece is carried above it. */
+  touch: boolean
   start: { x: number; y: number }
   moved: boolean
   /** The board's position and width on screen, measured as the pointer moves. */
@@ -32,6 +39,16 @@ export type Drag = {
 
 /** Where the piece would land. `fits` is true for a clean fit; false means it would overlap something. */
 export type DropTarget = Placement & { fits: boolean }
+
+/** Where the dragged piece is drawn on screen, `w` × `h` squares of `cell` pixels. */
+export function draggedBox(d: Drag, w: number, h: number, cell: number) {
+  const width = w * cell
+  const height = h * cell
+  const left = d.pointer.x - d.grab.x * width
+  // A finger holds it from below; a mouse holds it where it was picked up.
+  const top = d.touch ? d.pointer.y - FINGER_GAP - height : d.pointer.y - d.grab.y * height
+  return { left, top, width, height }
+}
 
 export function useDrag(state: GameState, dispatch: Dispatch<GameAction>, boardRef: RefObject<HTMLDivElement | null>) {
   const [drag, setDrag] = useState<Drag | null>(null)
@@ -50,8 +67,7 @@ export function useDrag(state: GameState, dispatch: Dispatch<GameAction>, boardR
     const { w, h } = footprint(piece, d.rotated)
 
     // The piece's centre has to be over the board for it to count.
-    const left = d.pointer.x - d.grab.x * w * cell
-    const top = d.pointer.y - d.grab.y * h * cell
+    const { left, top } = draggedBox(d, w, h, cell)
     const centreX = left + (w * cell) / 2 - board.left
     const centreY = top + (h * cell) / 2 - board.top
     if (centreX < 0 || centreX > board.width || centreY < 0 || centreY > board.width) return null
@@ -79,6 +95,7 @@ export function useDrag(state: GameState, dispatch: Dispatch<GameAction>, boardR
       rotated: placed?.rotated ?? state.trayRotated[pieceId] ?? false,
       grab: { x: (event.clientX - box.left) / box.width, y: (event.clientY - box.top) / box.height },
       pointer: { x: event.clientX, y: event.clientY },
+      touch: event.pointerType === 'touch',
       start: { x: event.clientX, y: event.clientY },
       moved: false,
       board: measureBoard(),
