@@ -880,7 +880,7 @@
   }
 }
 
-/* ---------- The scroll painting below the hero (components/backdrop/Emaki.tsx) ---------- */
+/* ---------- The scroll painting below the hero (components/library/Emaki.tsx) ---------- */
 
 /* Full-width paintings may poke past the column; never let them make the page scroll sideways. */
 .library {

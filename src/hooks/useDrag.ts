@@ -10,7 +10,7 @@
 import { useEffect, useState, type Dispatch, type PointerEvent, type RefObject } from 'react'
 import { canPlace, footprint } from '../game/board'
 import type { Placement } from '../game/types'
-import type { GameAction, GameState } from './gameReducer'
+import type { GameAction, GameState } from '../state/gameReducer'
 
 /** How far (in pixels) a press must travel before it counts as a drag, not a tap. */
 const DRAG_THRESHOLD = 6

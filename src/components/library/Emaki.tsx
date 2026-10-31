@@ -12,9 +12,8 @@
 
 import { useEffect, useRef, type JSX } from 'react'
 import { seededRandom } from '../../game/rng'
-import { Fade, InkedRidge, Pagoda, Peak } from '../hero/painting'
-import { heightAt, ridge, silhouette, taper, type Point } from '../hero/ridge'
-import { blob } from '../hero/treeParts'
+import { Fade, InkedRidge, Pagoda, Peak } from '../painting/landscape'
+import { blob, heightAt, ridge, silhouette, taper, type Point } from '../painting/ridge'
 
 const W = 4800
 const H = 1000

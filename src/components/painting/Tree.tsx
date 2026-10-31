@@ -9,9 +9,9 @@
 
 import { seededRandom } from '../../game/rng'
 import { Blossom } from './Blossom'
-import { Fade, InkedRidge } from './painting'
-import { ridge, silhouette, type Point } from './ridge'
-import { blob, type Dab, type Limb, type Mass } from './treeParts'
+import { Fade, InkedRidge } from './landscape'
+import { blob, ridge, silhouette, type Point } from './ridge'
+import type { Dab, Limb, Mass } from './treeParts'
 
 const SIZE = 1000
 

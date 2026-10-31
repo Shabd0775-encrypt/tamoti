@@ -33,7 +33,7 @@ export function Layer({ depth, children }: { depth: number; children: ReactNode 
   )
 }
 
-export const ridgeInk = (points: Point[]) => `M${points[0][0]} ${points[0][1]}${lineTo(points.slice(1))}`
+const ridgeInk = (points: Point[]) => `M${points[0][0]} ${points[0][1]}${lineTo(points.slice(1))}`
 
 /**
  * Ink gathered along a ridgeline, the way a loaded brush leaves its darkest
@@ -95,7 +95,6 @@ function peakGeometry(x: number, top: number, s: number, seed: number) {
 
 /** The hero's peak: summit at (600, 250) on the 1600 × 1000 canvas. */
 const heroPeak = peakGeometry(600, 250, 1, 11)
-export const peak = heroPeak.outline
 
 /**
  * A snow peak with alpine glow on its left face. `glow` from 0 (none) to 1 (full dusk).
@@ -196,7 +195,7 @@ const farLeft = ridge(
   0.18,
   2,
 )
-export const farRanges = [farLeft, farRight]
+const farRanges = [farLeft, farRight]
 
 export function FarRanges() {
   return (

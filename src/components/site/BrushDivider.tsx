@@ -1,6 +1,6 @@
 // A single dry stroke of pale ink between sections, in place of a ruled line.
 
-import { ridge, taper } from './hero/ridge'
+import { ridge, taper } from '../painting/ridge'
 
 const stroke = (() => {
   const points = ridge(

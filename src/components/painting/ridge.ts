@@ -4,6 +4,9 @@
 // which is roughly how real ridges look: big shapes, then smaller bumps.
 //
 // It uses the seeded generator, so the same seed always draws the same mountain.
+//
+// Also here: the other shapes the brushes are built from, such as tapered
+// strokes and round blobs.
 
 import { seededRandom } from '../../game/rng'
 
@@ -57,4 +60,22 @@ export function taper(points: Point[], from: number, to: number): string {
     right.push([x - Math.cos(angle) * half, y - Math.sin(angle) * half])
   })
   return `M${[...left, ...right.reverse()].map(([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`).join('L')}Z`
+}
+
+/** An irregular closed blob: a circle whose radius wanders, smoothed into curves. */
+/** `squash` is how tall it is compared with its width: 1 is round, 0.5 is twice as wide as tall. */
+export function blob(cx: number, cy: number, r: number, random: () => number, wobble = 0.45, squash = 0.8): string {
+  const n = 14
+  const raw = Array.from({ length: n }, () => 1 - wobble / 2 + random() * wobble)
+  const radii = raw.map((v, i) => (raw[(i + n - 1) % n] + v * 2 + raw[(i + 1) % n]) / 4)
+  const pts = radii.map((k, i) => {
+    const a = (i / n) * Math.PI * 2
+    return [cx + Math.cos(a) * r * k, cy + Math.sin(a) * r * k * squash] as const
+  })
+  const mid = (i: number) => {
+    const [x1, y1] = pts[i % n]
+    const [x2, y2] = pts[(i + 1) % n]
+    return `${((x1 + x2) / 2).toFixed(1)} ${((y1 + y2) / 2).toFixed(1)}`
+  }
+  return `M${mid(0)}${pts.map((_, i) => `Q${pts[(i + 1) % n][0].toFixed(1)} ${pts[(i + 1) % n][1].toFixed(1)} ${mid(i + 1)}`).join('')}Z`
 }

@@ -2,7 +2,7 @@
 
 import type { Ref } from 'react'
 import type { Rect } from '../../game/types'
-import { PaintedBoard } from '../PaintedBoard'
+import { PaintedBoard } from '../pieces/PaintedBoard'
 
 type Props = {
   size: number

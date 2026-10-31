@@ -3,7 +3,7 @@
 // which runs on behind it to the end of the page.
 
 import type { CSSProperties } from 'react'
-import { Seal } from './hero/Seal'
+import { Seal } from '../painting/Seal'
 
 export function Footer() {
   return (

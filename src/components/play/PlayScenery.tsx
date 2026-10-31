@@ -2,8 +2,8 @@
 // the library's hero, faded right back so the board stays the thing you
 // look at, with the rose glow and a few petals drifting through.
 
-import { FarRanges, Layer, Peak } from './hero/painting'
-import { Petals } from './hero/Petals'
+import { FarRanges, Layer, Peak } from '../painting/landscape'
+import { Petals } from '../painting/Petals'
 
 export function PlayScenery() {
   return (

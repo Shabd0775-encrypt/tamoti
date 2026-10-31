@@ -3,7 +3,7 @@
 // every puzzle in the library's lists.
 
 import type { Ref } from 'react'
-import type { Rect } from '../game/types'
+import type { Rect } from '../../game/types'
 
 const SIZE = 600
 

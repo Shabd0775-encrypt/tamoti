@@ -6,13 +6,14 @@
 // the tree, falling petals, then the words.
 
 import { useEffect, useRef, type RefObject } from 'react'
-import { BrushButton } from '../BrushButton'
+import { BrushButton } from '../site/BrushButton'
 import type { Rect } from '../../game/types'
-import { Backdrop, treeShape } from './Backdrop'
+import { Backdrop } from './Backdrop'
+import { treeShape } from './treeShape'
 import { BoardPreview } from './BoardPreview'
-import { Petals } from './Petals'
-import { Seal } from './Seal'
-import { Tree } from './Tree'
+import { Petals } from '../painting/Petals'
+import { Seal } from '../painting/Seal'
+import { Tree } from '../painting/Tree'
 
 type Props = {
   size: number

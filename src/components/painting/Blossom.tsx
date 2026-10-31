@@ -6,7 +6,8 @@
 //   pale haze → trunk and big limbs → body of the blossom → fine twigs
 //   → a few deeper blots → spray, loose petals blowing away, drips
 
-import { blob, Dabs, Limbs, type Dab, type Growth, type Mass } from './treeParts'
+import { blob } from './ridge'
+import { Dabs, Limbs, type Dab, type Growth, type Mass } from './treeParts'
 
 /** Choose a tone by chance, e.g. [['--sakura-300', 0.6], ['--sakura-500', 0.4]]. */
 function pick(random: () => number, tones: [string, number][]) {

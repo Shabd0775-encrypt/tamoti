@@ -8,8 +8,8 @@
 //   # E E B
 
 import type { CSSProperties } from 'react'
-import { Seal } from './hero/Seal'
-import { Piece } from './Piece'
+import { Seal } from '../painting/Seal'
+import { Piece } from '../pieces/Piece'
 
 // Where each piece ends up (column, row), and its size there.
 const demo = [

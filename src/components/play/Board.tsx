@@ -1,10 +1,10 @@
 import type { CSSProperties, KeyboardEvent, PointerEvent, Ref } from 'react'
-import { clashes, footprint } from '../game/board'
-import type { GameState } from '../state/gameReducer'
-import type { DropTarget } from '../state/useDrag'
-import { Seal } from './hero/Seal'
-import { Piece } from './Piece'
-import { toneFor } from './tone'
+import { clashes, footprint } from '../../game/board'
+import type { GameState } from '../../state/gameReducer'
+import type { DropTarget } from '../../hooks/useDrag'
+import { Seal } from '../painting/Seal'
+import { Piece } from '../pieces/Piece'
+import { toneFor } from '../pieces/tone'
 
 type Props = {
   ref: Ref<HTMLDivElement>

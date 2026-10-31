@@ -3,8 +3,8 @@
 // on a soft wash of pink watercolor.
 
 import type { CSSProperties } from 'react'
-import { seededRandom } from '../game/rng'
-import { blob } from './hero/treeParts'
+import { seededRandom } from '../../game/rng'
+import { blob } from '../painting/ridge'
 
 type Props = {
   sizes: number[]

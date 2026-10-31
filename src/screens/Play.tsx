@@ -1,14 +1,14 @@
 // The play screen: board, tray, and the controls around them.
 
 import { useEffect, useReducer, useRef, useState, type CSSProperties, type Dispatch, type KeyboardEvent } from 'react'
-import { Board } from '../components/Board'
-import { BrushButton } from '../components/BrushButton'
-import { Icon } from '../components/Icon'
-import { Piece } from '../components/Piece'
-import { PlayScenery, SolveGust } from '../components/PlayScenery'
-import { SolutionThumb } from '../components/SolutionThumb'
-import { toneFor } from '../components/tone'
-import { Tray } from '../components/Tray'
+import { Board } from '../components/play/Board'
+import { BrushButton } from '../components/site/BrushButton'
+import { Icon } from '../components/site/Icon'
+import { Piece } from '../components/pieces/Piece'
+import { PlayScenery, SolveGust } from '../components/play/PlayScenery'
+import { SolutionThumb } from '../components/play/SolutionThumb'
+import { toneFor } from '../components/pieces/tone'
+import { Tray } from '../components/play/Tray'
 import { canPlace, clashes, footprint, isSolved, onBoard, turnInPlace } from '../game/board'
 import { dailyPuzzleId } from '../game/daily'
 import { hint, parseSolutionKey, solutionKey } from '../game/hints'
@@ -16,7 +16,7 @@ import { findPuzzle, library, puzzleId, tierNames } from '../game/library'
 import { currentFootprint, gameReducer, newGame, type GameAction } from '../state/gameReducer'
 import type { Go } from '../state/route'
 import { play, useSound } from '../state/sound'
-import { useDrag } from '../state/useDrag'
+import { useDrag } from '../hooks/useDrag'
 
 type Props = {
   id: string

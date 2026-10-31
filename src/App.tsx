@@ -1,4 +1,4 @@
-import { WashFilters } from './components/hero/WashFilters'
+import { WashFilters } from './components/painting/WashFilters'
 import { Library } from './screens/Library'
 import { Play } from './screens/Play'
 import { useProgress } from './state/progress'

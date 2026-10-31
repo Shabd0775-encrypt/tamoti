@@ -1,9 +1,9 @@
 // A small picture of one way you filled a board: the blocked squares in ink,
 // each piece in its own color, as it lay when the board was done.
 
-import type { Placements, Puzzle } from '../game/types'
-import { footprint } from '../game/board'
-import { toneFor } from './tone'
+import type { Placements, Puzzle } from '../../game/types'
+import { footprint } from '../../game/board'
+import { toneFor } from '../pieces/tone'
 
 export function SolutionThumb({ puzzle, placements }: { puzzle: Puzzle; placements: Placements }) {
   const n = puzzle.size

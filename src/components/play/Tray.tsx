@@ -1,7 +1,7 @@
 import type { CSSProperties, KeyboardEvent, PointerEvent } from 'react'
-import { currentFootprint, type GameState } from '../state/gameReducer'
-import { Piece } from './Piece'
-import { toneFor } from './tone'
+import { currentFootprint, type GameState } from '../../state/gameReducer'
+import { Piece } from '../pieces/Piece'
+import { toneFor } from '../pieces/tone'
 
 type Props = {
   state: GameState
