@@ -6,6 +6,7 @@
 // the tree, falling petals, then the words.
 
 import { useEffect, useRef, type RefObject } from 'react'
+import { useBakedSheets } from '../painting/bake'
 import { BrushButton } from '../site/BrushButton'
 import type { Rect } from '../../game/types'
 import { Backdrop } from './Backdrop'
@@ -62,6 +63,7 @@ export function Hero({ size, next, onBegin, daily }: Props) {
   const root = useRef<HTMLElement>(null)
   const preview = useRef<SVGSVGElement>(null)
   useParallax(root)
+  useBakedSheets(root, '.mountains svg.mtn-layer')
 
   const label = `${size}×${size}, No. ${next.number}`
 

@@ -11,6 +11,7 @@
 //   near  dark ink rocks along the bottom edge, with a cherry tree or two
 
 import { useEffect, useRef, type JSX } from 'react'
+import { useBakedSheets } from '../painting/bake'
 import { seededRandom } from '../../game/rng'
 import { Fade, InkedRidge, Pagoda, Peak } from '../painting/landscape'
 import { blob, heightAt, ridge, silhouette, taper, type Point } from '../painting/ridge'
@@ -388,6 +389,8 @@ function Near() {
 
 export function Emaki() {
   const stage = useRef<HTMLDivElement>(null)
+  // Pale washes behind the words: a little coarser on phones is invisible, and saves memory.
+  useBakedSheets(stage, 'svg.emaki-layer', 1.5)
 
   // How far through the page you are, from 0 to 1, drives the slide and the light.
   useEffect(() => {
@@ -396,10 +399,11 @@ export function Emaki() {
     // Browsers with scroll-linked animations do all of this in CSS (see .emaki in library.css).
     if (CSS.supports('animation-timeline: view()')) return
     // How far each sheet slides across its width: far ones a little, near ones all the way.
-    const sheets: Array<[SVGSVGElement, number]> = [
-      [stage.current.querySelector<SVGSVGElement>('.emaki-far')!, 0.45],
-      [stage.current.querySelector<SVGSVGElement>('.emaki-mid')!, 0.75],
-      [stage.current.querySelector<SVGSVGElement>('.emaki-near')!, 1],
+    // Looked up on every frame, since on phones each sheet is swapped for a painted copy (see bake.ts).
+    const paces: Array<[string, number]> = [
+      ['.emaki-far', 0.45],
+      ['.emaki-mid', 0.75],
+      ['.emaki-near', 1],
     ]
     const dusk = stage.current.querySelector<HTMLElement>('.emaki-dusk')
     let frame = 0
@@ -408,12 +412,14 @@ export function Emaki() {
       const box = el.getBoundingClientRect()
       const progress = Math.min(1, Math.max(0, -box.top / Math.max(1, box.height - window.innerHeight)))
       // Each sheet is moved directly (a transform the graphics card handles alone), which keeps scrolling smooth.
-      for (const [sheet, pace] of sheets) {
-        // The sheet's width follows from its height and the painting's proportions (W × H), which every
-        // browser reports the same way; how far it can slide is whatever of it is off screen.
-        const width = (sheet.getBoundingClientRect().height * W) / H
-        const travel = Math.max(0, width - window.innerWidth)
-        sheet.style.transform = `translate3d(${(-progress * travel * pace).toFixed(1)}px, 0, 0)`
+      for (const [selector, pace] of paces) {
+        for (const sheet of stage.current?.querySelectorAll<HTMLElement | SVGSVGElement>(selector) ?? []) {
+          // The sheet's width follows from its height and the painting's proportions (W × H), which every
+          // browser reports the same way; how far it can slide is whatever of it is off screen.
+          const width = (sheet.getBoundingClientRect().height * W) / H
+          const travel = Math.max(0, width - window.innerWidth)
+          sheet.style.transform = `translate3d(${(-progress * travel * pace).toFixed(1)}px, 0, 0)`
+        }
       }
       if (dusk) dusk.style.opacity = (progress * 0.85).toFixed(3)
     }

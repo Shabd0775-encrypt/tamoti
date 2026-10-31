@@ -279,6 +279,13 @@
   filter: blur(6px);
 }
 
+/* On touch screens a whole section softening and sharpening is costly; it rises and fades in instead. */
+@media (pointer: coarse) {
+  .js [data-reveal]:not(.is-in) {
+    filter: none;
+  }
+}
+
 /* The heading and sentence that open a section, as in "Choose a board". */
 .section-head {
   display: flex;
