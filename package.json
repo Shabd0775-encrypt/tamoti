@@ -1,7 +1,21 @@
 {
   "name": "tamoti",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "A calm tiling puzzle, painted like a Japanese ink-and-watercolour scroll.",
+  "author": "Shabd Sharma",
+  "license": "MIT",
+  "homepage": "https://tamoti.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Shabd0775-encrypt/tamoti.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Shabd0775-encrypt/tamoti/issues"
+  },
+  "engines": {
+    "node": ">=22"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",
