@@ -33,7 +33,8 @@ describe('library', () => {
         if (size <= 7) expect(solve(puzzle).solutions, `${size}-${entry.number}`).toBe(entry.solutions)
       }
     }
-  })
+    // Solving all 144 boards takes a few seconds, longer on slower machines such as CI.
+  }, 60_000)
 
   it('puts blockers in tough spots: no corners; past 5×5, none touching and mostly away from the edge', () => {
     for (const size of sizes) {
